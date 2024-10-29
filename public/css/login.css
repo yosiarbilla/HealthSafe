@@ -1,0 +1,70 @@
+/* Container styling */
+.login-container {
+    max-width: 900px;
+    margin: auto;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Left panel styling (Login Form Section) */
+.login-container .col-md-6:first-child {
+    background: linear-gradient(to bottom right, #00c6ff, #0072ff);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+}
+
+.login-container .col-md-6 img.img-fluid {
+    width: 80px;
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+.form-control {
+    border-radius: 4px;
+    padding: 0.75rem;
+    border: none;
+    outline: none;
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+}
+
+/* Login Button */
+.btn-light {
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-light:hover {
+    background-color: #e0e0e0;
+}
+
+/* Forgot Password Link */
+.text-center a {
+    color: #d9f0ff;
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+.text-center a:hover {
+    color: #ffffff;
+}
+
+/* Right panel styling (Image Section) */
+.login-container .col-md-6:last-child img {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
