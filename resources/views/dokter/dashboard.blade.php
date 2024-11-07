@@ -112,6 +112,12 @@
             <h3>Dokter</h3>
             <button class="btn">Daftar Antrian</button>
             <button class="btn">Rekam Medis</button>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn">
+                    Logout
+                </button>
+            </form>
         </div>
 
         <!-- Main content -->
