@@ -29,11 +29,11 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         if($request->user()->name === 'administrasi'){
-            
+
             return redirect('admin/dashboard');
         }
         if($request->user()->name === 'dokter'){
-            
+
             return redirect('dokter/dashboard');
         }
     }

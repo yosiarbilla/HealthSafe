@@ -120,7 +120,7 @@
             <div class="logo-container">
                 <img src="{{ asset('images/Logo.png') }}" alt="Logo" class="img-fluid Logo-img">
             </div>
-            
+
             <!-- Rounded Form Box -->
             <div class="form-box">
                 <!-- Session Status -->
@@ -128,7 +128,7 @@
 
                 <form method="POST" action="{{ route('login') }}" class="w-100">
                     @csrf
-                    
+
                     <!-- Email Address -->
                     <div class="mb-3">
                         <label for="email" class="form-label">{{ __('Username') }}</label>
