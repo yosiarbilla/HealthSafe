@@ -1,7 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DokterController;
+use App\Http\Middleware\Admin;
+use App\Http\Middleware\Dokter;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 Route::redirect('/', 'login');
 
@@ -16,3 +21,13 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+route::middleware(['auth', Admin::class])->group(function(){
+    route::get('admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    route::get('admin/daftarantrian', [AdminController::class, 'daftarantrian'])->name('admin.daftarantrian');
+});
+route::middleware(['auth', Dokter::class])->group(function(){
+    route::get('dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
+});
+//route::get('admin/dashboard', [AdminController::class, 'index'])->middleware(['auth', 'admin']);
+//route::get('dokter/dashboard', [DokterController::class, 'index'])->middleware(['auth', 'dokter']);
