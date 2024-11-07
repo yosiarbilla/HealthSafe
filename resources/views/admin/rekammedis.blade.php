@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Antrian</title>
+    <title>Rekam Medis</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
@@ -155,7 +155,8 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-        @include('admin.sidebar')
+      @include('admin.sidebar')
+
         <!-- Main content -->
         <div class="col main-content">
             <!-- Back arrow and Header -->
@@ -163,7 +164,7 @@
                 <a href="{{url('/admin/dashboard')}}" class="d-inline-flex align-items-center mb-3 text-decoration-none">
                     <i class="back-arrow bi bi-arrow-left"></i>
                 </a>
-                <h1 class="dashboard-header ms-2">Daftar Antrian</h1>
+                <h1 class="dashboard-header ms-2">Rekam Medis</h1>
             </div>
 
             <!-- Search bar -->
