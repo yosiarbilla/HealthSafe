@@ -23,11 +23,16 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';
 
 route::middleware(['auth', Admin::class])->group(function(){
-    route::get('admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    route::get('admin/daftarantrian', [AdminController::class, 'daftarantrian'])->name('admin.daftarantrian');
+    route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    route::get('/admin/daftarantrian', [AdminController::class, 'daftarantrian'])->name('admin.daftarantrian');
+    route::post('/admin/tambahantrian', [AdminController::class, 'tambahantrian'])->name('admin.tambahantrian');
+    Route::get('/admin/search-antrian', [AdminController::class, 'searchAntrian'])->name('admin.search.antrian');
+    Route::get('/admin/rekam-medis', [AdminController::class, 'rekammedis'])->name('admin.rekammedis');
 });
 route::middleware(['auth', Dokter::class])->group(function(){
-    route::get('dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
+    route::get('/dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
+    route::get('/dokter/daftarantrian', [DokterController::class, 'daftarantrian'])->name('dokter.daftarantrian');    
+    Route::get('/dokter/search-antrian', [DokterController::class, 'searchAntrian'])->name('dokter.search.antrian');
+    Route::get('/dokter/rekam-medis', [DokterController::class, 'rekammedis'])->name('dokter.rekammedis');
+    Route::get('/dokter/detailpasien/{id}', [DokterController::class, 'lihatdetail'])->name('dokter.lihatdetail');
 });
-//route::get('admin/dashboard', [AdminController::class, 'index'])->middleware(['auth', 'admin']);
-//route::get('dokter/dashboard', [DokterController::class, 'index'])->middleware(['auth', 'dokter']);

@@ -107,18 +107,7 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-        <div class="col-auto sidebar d-flex flex-column align-items-center">
-            <img src="{{ asset('images/Logo.png') }}" alt="Logo" class="logo img-fluid">
-            <h3>Dokter</h3>
-            <button class="btn">Daftar Antrian</button>
-            <button class="btn">Rekam Medis</button>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="btn">
-                    Logout
-                </button>
-            </form>
-        </div>
+       @include('dokter.sidebar')
 
         <!-- Main content -->
         <div class="col main-content">

@@ -15,7 +15,7 @@ class Dokter
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(Auth::user()->name != 'dokter'){
+        if(Auth::user()->username != 'dokter'){
             return redirect ('login');
         }
 

@@ -155,12 +155,12 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-        @include('admin.sidebar')
+        @include('dokter.sidebar')
         <!-- Main content -->
         <div class="col main-content">
             <!-- Back arrow and Header -->
             <div class="d-flex align-items-center mb-3">
-                <a href="{{url('/admin/dashboard')}}" class="d-inline-flex align-items-center mb-3 text-decoration-none">
+                <a href="{{url('/dokter/dashboard')}}" class="d-inline-flex align-items-center mb-3 text-decoration-none">
                     <i class="back-arrow bi bi-arrow-left"></i>
                 </a>
                 <h1 class="dashboard-header ms-2">Daftar Antrian</h1>
@@ -174,9 +174,7 @@
             </div>
 
             <!-- Add Patient Button with "+" icon -->
-            <button class="add-patient-btn" data-bs-toggle="modal" data-bs-target="#addPatientModal">
-                <i class="bi bi-plus-lg"></i> Tambah Pasien
-            </button>
+
 
             <!-- Total Count -->
             <div class="total-count">Total Antrian: {{ $data->count() }}</div>
@@ -197,6 +195,9 @@
                         <p><strong>Gender:</strong> {{ $patient->gender }}</p>
                         <p><strong>Pendidikan:</strong> {{ $patient->pendidikan }}</p>
                         <p><strong>Pekerjaan:</strong> {{ $patient->pekerjaan }}</p>
+                        <button type="button" class="btn btn-info mt-2" data-bs-toggle="modal" data-bs-target="#detailsModal{{ $index }}">
+                View Details
+            </button>
                     </div>
                 </div>
                 @endforeach
@@ -206,55 +207,6 @@
 </div>
 
 <!-- Add Patient Modal -->
-<div class="modal fade" id="addPatientModal" tabindex="-1" aria-labelledby="addPatientModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addPatientModalLabel">Tambah Pasien</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form action="{{ url('/admin/tambahantrian') }}" method="POST">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="patientName" class="form-label">Nama Pasien</label>
-                        <input type="text" class="form-control" name="nama" placeholder="Masukkan nama pasien">
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientAddress" class="form-label">Alamat</label>
-                        <input type="text" class="form-control" name="alamat" placeholder="Masukkan alamat pasien">
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientAge" class="form-label">Umur</label>
-                        <input type="number" class="form-control" name="umur" placeholder="Masukkan usia pasien">
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientGender" class="form-label">Jenis Kelamin</label>
-                        <select class="form-select" name="gender">
-                            <option selected disabled>Pilih jenis kelamin</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientEducation" class="form-label">Pendidikan</label>
-                        <input type="text" class="form-control" name="pendidikan" placeholder="Masukkan pendidikan pasien">
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientJob" class="form-label">Pekerjaan</label>
-                        <input type="text" class="form-control" name="pekerjaan" placeholder="Masukkan pekerjaan pasien">
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientDate" class="form-label">Tanggal Pemeriksaan</label>
-                        <input type="date" class="form-control" name="tanggal" placeholder="Pilih tanggal">
-                    </div>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Success Toast Notification -->
 <div class="toast-container">
@@ -273,7 +225,7 @@
         var searchQuery = $('#searchInput').val();
 
         $.ajax({
-            url: "{{ route('admin.search.antrian') }}",  // Replace with the correct route
+            url: "{{ route('dokter.search.antrian') }}",  // Replace with the correct route
             type: "GET",
             data: { search: searchQuery },
             success: function(data) {
