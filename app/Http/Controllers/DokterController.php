@@ -14,7 +14,7 @@ class DokterController extends Controller
         return view('dokter.daftarantrian', compact('data'));
     }
     public function rekammedis(){
-        $data=pasien::all();
+        $data = Pasien::all();
         return view('dokter.rekammedis', compact('data'));
     }
 
@@ -22,6 +22,7 @@ class DokterController extends Controller
         $data = Pasien::findOrFail($id); // Retrieve the patient data based on the ID
         return view('dokter.lihatdetail', compact('data'));
     }
+    
     
 
     public function searchAntrian(Request $request)
@@ -43,4 +44,67 @@ class DokterController extends Controller
 
     return response($output);
 }
+
+// In DokterController.php
+public function markAsCompleted($id)
+        {
+            $patient = Pasien::findOrFail($id);
+            $patient->status = 'selesai';
+            $patient->save();
+        
+            return redirect()->back()->with('success', 'Pasien telah selesai.');
+        }
+        public function markAsInProgress($id)
+        {
+            $patient = Pasien::findOrFail($id);
+
+            // Update the status to 'sedang diperiksa'
+            $patient->status = 'sedang diperiksa';
+            $patient->save();
+
+            // Redirect to Rekam Medis page with patient data
+            return redirect()->route('dokter.rekammedis', ['id' => $id])->with('patient', $patient);
+        }
+        
+        public function updateStatus($id)
+        {
+            // Temukan pasien berdasarkan ID
+            $patient = Pasien::find($id);
+        
+            if ($patient) {
+                // Update status pasien
+                $patient->status = 'sedang diperiksa';
+                $patient->save();
+        
+                return response()->json(['success' => true, 'message' => 'Status pasien diperbarui.']);
+            }
+        
+            return response()->json(['success' => false, 'message' => 'Pasien tidak ditemukan.']);
+        }
+        public function saveExamination(Request $request)
+{
+    // Validate the incoming request data
+    $request->validate([
+        'id' => 'required|exists:pasiens,id',  // Ensures that 'id' exists in the 'pasiens' table
+        'keluhan' => 'required|string',
+        'diagnosis' => 'required|string',
+        'obat' => 'required|string',
+    ]);
+
+    // Retrieve the patient record based on the id
+    $patient = Pasien::find($request->id);
+
+    // Update the patient record with the new examination data
+    $patient->keluhan = $request->keluhan;
+    $patient->diagnosis = $request->diagnosis;
+    $patient->obat = $request->obat;
+    $patient->status = 'selesai'; // Assuming you want to mark the examination as complete
+
+    // Save the updated record to the database
+    $patient->save();
+
+    // Optionally, redirect or return a success response
+    return response()->json(['message' => 'Examination data saved successfully'], 200);
+}
+
 }

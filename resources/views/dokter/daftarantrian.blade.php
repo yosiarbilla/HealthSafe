@@ -4,16 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Antrian</title>
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         /* General layout styling */
         body {
             background-color: #f5f5f5;
             font-family: Arial, sans-serif;
         }
-
-        /* Sidebar styling */
         .sidebar {
             background: linear-gradient(196.32deg, #97EEC8 0.87%, #0085AA 100%);
             color: white;
@@ -24,13 +27,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-y: auto;
+            position: fixed;
         }
-
         .logo {
             width: 150px;
             margin-bottom: 1.5rem;
         }
-
         .sidebar h3 {
             font-size: 1.2rem;
             font-weight: bold;
@@ -38,7 +41,6 @@
             margin-bottom: 1.5rem;
             text-align: center;
         }
-
         .sidebar .btn {
             background-color: #e0f7fa;
             color: #0085AA;
@@ -48,18 +50,15 @@
             margin-bottom: 1rem;
             font-weight: bold;
         }
-
-        /* Main content styling */
         .main-content {
             padding: 2rem;
+            margin-left: 20vw;
         }
-
         .back-arrow {
             font-size: 1.5rem;
             color: #0085AA;
             cursor: pointer;
         }
-
         .dashboard-header {
             font-size: 2rem;
             font-weight: bold;
@@ -67,7 +66,6 @@
             text-shadow: 1px 1px #ccc;
             margin-bottom: 1rem;
         }
-
         .search-bar {
             border-radius: 20px;
             background-color: #e0f7fa;
@@ -78,7 +76,6 @@
             margin-bottom: 1rem;
             max-width: 500px;
         }
-
         .search-bar input {
             border: none;
             outline: none;
@@ -86,12 +83,9 @@
             flex: 1;
             padding-left: 0.5rem;
         }
-
         .search-bar i {
             color: #0085AA;
         }
-
-        /* Patient list styling */
         .patient-list {
             background-color: #d6f5f7;
             border-radius: 10px;
@@ -100,8 +94,9 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             font-weight: bold;
             color: #0085AA;
+            display: flex;
+            align-items: center;
         }
-
         .total-count {
             font-weight: bold;
             color: #0085AA;
@@ -112,41 +107,9 @@
             margin-bottom: 1rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
-        /* Add Patient Button */
-        .add-patient-btn {
-            background-color: #00C6FF;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 0.5rem 1.5rem;
-            font-weight: bold;
-            font-size: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .add-patient-btn:hover {
-            background-color: #0072ff;
-        }
-
         .modal-content {
             padding: 2rem;
             border-radius: 15px;
-        }
-
-        /* Toast styling for top-center positioning */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 11;
         }
     </style>
 </head>
@@ -154,93 +117,229 @@
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
         @include('dokter.sidebar')
-        <!-- Main content -->
         <div class="col main-content">
-            <!-- Back arrow and Header -->
             <div class="d-flex align-items-center mb-3">
                 <a href="{{url('/dokter/dashboard')}}" class="d-inline-flex align-items-center mb-3 text-decoration-none">
                     <i class="back-arrow bi bi-arrow-left"></i>
                 </a>
                 <h1 class="dashboard-header ms-2">Daftar Antrian</h1>
             </div>
-
-            <!-- Search bar -->
             <div class="search-bar">
                 <i class="bi bi-search"></i>
-                <input type="text" name="search" id="searchInput" placeholder="Masukkan Nama Pasien" onkeyup="searchPatient()"  >
-                </form>
+                <input type="text" name="search" id="searchInput" placeholder="Masukkan Nama Pasien" onkeyup="searchPatient()">
             </div>
-
-            <!-- Add Patient Button with "+" icon -->
-
-
-            <!-- Total Count -->
             <div class="total-count">Total Antrian: {{ $data->count() }}</div>
-
-            <!-- Patient List -->
             <div id="patientList">
-            @foreach($data as $index => $patient)
-                <div class="patient-list " data-bs-toggle="collapse" data-bs-target="#collapsePatient{{ $index }}" aria-expanded="false" aria-controls="collapsePatient{{ $index }}">
-                <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{$patient->nama_lengkap}}   </span>
-                    <i class="dropdown-icon bi bi-chevron-down collapsed"></i>
-                </div>
-                <div id="collapsePatient{{ $index }}" class="collapse">
-                    <div class="p-3">
-                        <p><strong>Tanggal Pemeriksaan:</strong> {{ \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d/m/Y') }}</p>
-                        <p><strong>Nama:</strong> {{ $patient->nama_lengkap }}</p>
-                        <p><strong>Alamat:</strong> {{ $patient->alamat }}</p>
-                        <p><strong>Umur:</strong> {{ $patient->umur }}</p>
-                        <p><strong>Gender:</strong> {{ $patient->gender }}</p>
-                        <p><strong>Pendidikan:</strong> {{ $patient->pendidikan }}</p>
-                        <p><strong>Pekerjaan:</strong> {{ $patient->pekerjaan }}</p>
-                        <button type="button" class="btn btn-info mt-2" data-bs-toggle="modal" data-bs-target="#detailsModal{{ $index }}">
-                View Details
-            </button>
+                @foreach($data as $index => $patient)
+                <div class="patient-list d-flex justify-content-between align-items-center">
+                    <div class="patient-info d-flex align-items-center">
+                        <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{$patient->nama_lengkap}}</span>
+                        <span class="ms-3 badge 
+                            @if($patient->status === 'sedang diperiksa') bg-danger 
+                            @elseif($patient->status === 'selesai') bg-success 
+                            @else bg-secondary 
+                            @endif">
+                            {{ ucfirst($patient->status) }}
+                        </span>
+                    </div>
+                    <div class="button-group ms-auto">
+                        <button class="btn btn-primary btn-sm" onclick="openExamineModal({
+                            id: {{ $patient->id }},
+                            tanggal_pemeriksaan: '{{ \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d/m/Y') }}',
+                            nama_lengkap: '{{ $patient->nama_lengkap }}',
+                            alamat: '{{ $patient->alamat }}',
+                            umur: '{{ $patient->umur }}',
+                            gender: '{{ $patient->gender }}',
+                            pendidikan: '{{ $patient->pendidikan }}',
+                            pekerjaan: '{{ $patient->pekerjaan }}'
+                        })">Periksa</button>
                     </div>
                 </div>
                 @endforeach
-    </div>
+            </div>
         </div>
     </div>  
 </div>
 
-<!-- Add Patient Modal -->
-
-<!-- Success Toast Notification -->
-<div class="toast-container">
-    <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body">
-                Data berhasil ditambahkan!
+<div class="modal fade" id="examineModal" tabindex="-1" aria-labelledby="examineModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="examineModalLabel">Periksa Pasien</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            <div class="modal-body">
+                <div id="patientInfo">
+                    <p><strong>Tanggal Pemeriksaan:</strong> <span id="tanggalPemeriksaan"></span></p>
+                    <p><strong>Nama:</strong> <span id="namaPasien"></span></p>
+                    <p><strong>Alamat:</strong> <span id="alamatPasien"></span></p>
+                    <p><strong>Umur:</strong> <span id="umurPasien"></span></p>
+                    <p><strong>Gender:</strong> <span id="genderPasien"></span></p>
+                    <p><strong>Pendidikan:</strong> <span id="pendidikanPasien"></span></p>
+                    <p><strong>Pekerjaan:</strong> <span id="pekerjaanPasien"></span></p>
+                </div>
+                <form id="examinationForm" action="{{ route('dokter.saveExamination') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="id" id="patientId"> <!-- Adjust this based on your backend requirements -->
+                    <div class="mb-3">
+                        <label for="keluhan" class="form-label">Keluhan</label>
+                        <textarea class="form-control" id="keluhan" name="keluhan" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="diagnosis" class="form-label">Diagnosis</label>
+                        <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="obat" class="form-label">Obat</label>
+                        <input type="text" class="form-control" id="obat" name="obat" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
 <script>
-    function searchPatient() {
-        var searchQuery = $('#searchInput').val();
+function searchPatient() {
+    var searchQuery = $('#searchInput').val();
+    $.ajax({
+        url: "{{ route('admin.search.antrian') }}",
+        type: "GET",
+        data: { search: searchQuery },
+        success: function(response) {
+            $('#patientList').html(response);
+            initializeDynamicListeners();
+        },
+        error: function(xhr, status, error) {
+            console.error("Error during search:", error);
+        }
+    });
+}
+
+function initializeDynamicListeners() {
+    $('.patient-info').each(function(index) {
+        let collapseId = $(this).data('bs-target');
+        let arrowIcon = $(this).find('.chevron-icon');
+
+        $(collapseId).on('show.bs.collapse', function() {
+            arrowIcon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
+        }).on('hide.bs.collapse', function() {
+            arrowIcon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        });
+    });
+}
+
+$(document).ready(function() {
+    initializeDynamicListeners();
+});
+
+function confirmMarkAsCompleted(event, patientId) {
+    event.preventDefault();
+    swal({
+        title: "Apakah Anda yakin?",
+        text: "Setelah ditandai selesai, pasien akan dihapus dari antrian.",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    }).then((willMarkAsCompleted) => {
+        if (willMarkAsCompleted) {
+            document.getElementById('markAsCompletedForm' + patientId).submit();
+        }
+    });
+}
+
+function confirmInProgress(event, patientId) {
+    event.preventDefault();
+    swal({
+        title: "Apakah Anda yakin?",
+        text: "Pasien akan ditandai sebagai sedang diperiksa.",
+        icon: "info",
+        buttons: true,
+    }).then((willProceed) => {
+        if (willProceed) {
+            document.getElementById('inProgressForm' + patientId).submit();
+        }
+    });
+}
+function startExamination(patientId) {
+    // Submit the form to update status and redirect
+    document.getElementById('startExaminationForm' + patientId).submit();
+}
+function handleFormSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+
+    $.ajax({
+        url: form.action,
+        method: 'POST',
+        data: $(form).serialize(),
+        success: function(response) {
+            if (response.success) {
+                // Hide the modal
+                $('#examineModal').modal('hide');
+
+                // Remove the patient from the list based on patient ID
+                const patientId = document.getElementById('patientId').value;
+                $(`#patientList .patient-list[data-id="${patientId}"]`).remove();
+            } else {
+                alert('Failed to save data.');
+            }
+        },
+        error: function() {
+            alert('An error occurred. Please try again.');
+        }
+    });
+    return false;
+}
+function openExamineModal(patient) {
+        document.getElementById('patientId').value = patient.id;
+        document.getElementById('tanggalPemeriksaan').innerText = patient.tanggal_pemeriksaan;
+        document.getElementById('namaPasien').innerText = patient.nama_lengkap;
+        document.getElementById('alamatPasien').innerText = patient.alamat;
+        document.getElementById('umurPasien').innerText = patient.umur;
+        document.getElementById('genderPasien').innerText = patient.gender;
+        document.getElementById('pendidikanPasien').innerText = patient.pendidikan;
+        document.getElementById('pekerjaanPasien').innerText = patient.pekerjaan;
+
+        $('#examineModal').modal('show');
+    }
+
+    // Configure CSRF token for AJAX requests
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    // Handle the examination form submission with AJAX
+    $('#examinationForm').on('submit', function(e) {
+        e.preventDefault();
 
         $.ajax({
-            url: "{{ route('dokter.search.antrian') }}",  // Replace with the correct route
-            type: "GET",
-            data: { search: searchQuery },
-            success: function(data) {
-                $('#patientList').html(data);
-            }
-        });
+    url: "{{ route('dokter.saveExamination') }}",
+    type: "POST",
+    data: $(this).serialize(),
+    success: function(response) {
+        console.log("Server response:", response);
+        if (response.success) {
+            $('#examineModal').modal('hide');
+            $('#patientList').find(`[data-patient-id="${$('#patientId').val()}"]`).remove();
+            alert('Data saved successfully and moved to Rekam Medis.');
+        } else {
+            alert('Error saving data: ' + response.message);
+        }
+    },
+    error: function(xhr) {
+        console.error("Error response:", xhr.responseText);
+        alert('An error occurred. Please try again.');
     }
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<script>
-    @if(session('success'))
-        var toast = new bootstrap.Toast(document.getElementById('successToast'))
-        toast.show();
-    @endif
-</script>
+});
+    });
 
+
+</script>
 </body>
 </html>

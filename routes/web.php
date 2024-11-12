@@ -27,12 +27,27 @@ route::middleware(['auth', Admin::class])->group(function(){
     route::get('/admin/daftarantrian', [AdminController::class, 'daftarantrian'])->name('admin.daftarantrian');
     route::post('/admin/tambahantrian', [AdminController::class, 'tambahantrian'])->name('admin.tambahantrian');
     Route::get('/admin/search-antrian', [AdminController::class, 'searchAntrian'])->name('admin.search.antrian');
+    Route::get('/admin/search-antrian2', [AdminController::class, 'searchAntrian2'])->name('admin.search.antrian2');
     Route::get('/admin/rekam-medis', [AdminController::class, 'rekammedis'])->name('admin.rekammedis');
+    Route::delete('/admin/daftarantrian/{id}', [AdminController::class, 'deletePatient'])->name('admin.delete.antrian');
+    Route::put('/admin/daftarantrian/{id}', [AdminController::class, 'editPatient'])->name('admin.edit.antrian');
+    Route::put('/admin/mark-as-completed/{id}', [AdminController::class, 'markAsCompleted'])->name('admin.markAsCompleted');
+    Route::put('/admin/mark-as-in-progress/{id}', [AdminController::class, 'markAsInProgress'])->name('admin.markAsInProgress');
+    Route::post('/admin/patient/{id}/update-status', [AdminController::class, 'updateStatus'])->name('admin.patient.updateStatus');
+
 });
 route::middleware(['auth', Dokter::class])->group(function(){
     route::get('/dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
     route::get('/dokter/daftarantrian', [DokterController::class, 'daftarantrian'])->name('dokter.daftarantrian');    
     Route::get('/dokter/search-antrian', [DokterController::class, 'searchAntrian'])->name('dokter.search.antrian');
     Route::get('/dokter/rekam-medis', [DokterController::class, 'rekammedis'])->name('dokter.rekammedis');
+
     Route::get('/dokter/detailpasien/{id}', [DokterController::class, 'lihatdetail'])->name('dokter.lihatdetail');
+    Route::put('/dokter/mark-as-completed/{id}', [DokterController::class, 'markAsCompleted'])->name('dokter.markAsCompleted');
+    Route::put('/dokter/mark-as-in-progress/{id}', [DokterController::class, 'markAsInProgress'])->name('dokter.markAsInProgress');
+    Route::post('/dokter/patient/{id}/update-status', [DokterController::class, 'updateStatus'])->name('dokter.patient.updateStatus');
+    Route::put('/dokter/periksa/{id}', [DokterController::class, 'markAsInProgress'])->name('dokter.markAsInProgress');
+    Route::post('/dokter/save-examination', [DokterController::class, 'saveExamination'])->name('dokter.saveExamination');
+
+
 });

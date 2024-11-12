@@ -3,5 +3,6 @@
             <h3>Dokter</h3>
             <a href="{{ route('dokter.daftarantrian') }}" class="btn">Daftar Antrian</a>
             <a href="{{ route('dokter.rekammedis') }}" class="btn">Rekam Medis</a>
+
             
 </div>  

@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekam Medis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
     <style>
         /* General layout styling */
         body {
@@ -24,6 +27,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: fixed;
         }
 
         .logo {
@@ -52,6 +56,7 @@
         /* Main content styling */
         .main-content {
             padding: 2rem;
+            margin-left: 20vw;
         }
 
         .back-arrow {
@@ -147,7 +152,15 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 11;
+            
         }
+        .examination-date {
+    font-weight: bold;
+    color: #0085AA;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
     </style>
 </head>
 <body>
@@ -155,7 +168,7 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-      @include('admin.sidebar')
+        @include('admin.sidebar')
 
         <!-- Main content -->
         <div class="col main-content">
@@ -170,38 +183,42 @@
             <!-- Search bar -->
             <div class="search-bar">
                 <i class="bi bi-search"></i>
-                <input type="text" name="search" id="searchInput" placeholder="Masukkan Nama Pasien" onkeyup="searchPatient()"  >
-                </form>
+                <input type="text" name="search" id="searchInput" placeholder="Masukkan Nama Pasien" onkeyup="searchPatient2()">
             </div>
 
             <!-- Add Patient Button with "+" icon -->
-            <button class="add-patient-btn" data-bs-toggle="modal" data-bs-target="#addPatientModal">
-                <i class="bi bi-plus-lg"></i> Tambah Pasien
-            </button>
+            
 
-            <!-- Total Count -->
-            <div class="total-count">Total Antrian: {{ $data->count() }}</div>
+            
 
             <!-- Patient List -->
             <div id="patientList">
-            @foreach($data as $index => $patient)
-                <div class="patient-list " data-bs-toggle="collapse" data-bs-target="#collapsePatient{{ $index }}" aria-expanded="false" aria-controls="collapsePatient{{ $index }}">
-                <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{$patient->nama_lengkap}}   </span>
-                    <i class="dropdown-icon bi bi-chevron-down collapsed"></i>
-                </div>
-                <div id="collapsePatient{{ $index }}" class="collapse">
-                    <div class="p-3">
-                        <p><strong>Tanggal Pemeriksaan:</strong> {{ \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d/m/Y') }}</p>
-                        <p><strong>Nama:</strong> {{ $patient->nama_lengkap }}</p>
-                        <p><strong>Alamat:</strong> {{ $patient->alamat }}</p>
-                        <p><strong>Umur:</strong> {{ $patient->umur }}</p>
-                        <p><strong>Gender:</strong> {{ $patient->gender }}</p>
-                        <p><strong>Pendidikan:</strong> {{ $patient->pendidikan }}</p>
-                        <p><strong>Pekerjaan:</strong> {{ $patient->pekerjaan }}</p>
-                    </div>
-                </div>
+                @foreach($data as $date => $patients)
+                    <!-- Examination Date Header -->
+                    <h4 class="examination-date">{{ $date }}</h4>
+                    
+                    <!-- List of Patients for this Date -->
+                    @foreach($patients as $patient)
+                        <div class="patient-list d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapsePatient{{ $patient->id }}" aria-expanded="false" aria-controls="collapsePatient{{ $patient->id }}">
+                            <span class="d-flex align-items-center">
+                                {{ $patient->nama_lengkap }}
+                                <i class="dropdown-icon bi bi-chevron-down ms-2"></i>
+                            </span>
+                        </div>
+                        <div id="collapsePatient{{ $patient->id }}" class="collapse">
+                            <div class="p-3">
+                                <p><strong>Tanggal Pemeriksaan:</strong> {{ \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d/m/Y') }}</p>
+                                <p><strong>Nama:</strong> {{ $patient->nama_lengkap }}</p>
+                                <p><strong>Alamat:</strong> {{ $patient->alamat }}</p>
+                                <p><strong>Umur:</strong> {{ $patient->umur }}</p>
+                                <p><strong>Gender:</strong> {{ $patient->gender }}</p>
+                                <p><strong>Pendidikan:</strong> {{ $patient->pendidikan }}</p>
+                                <p><strong>Pekerjaan:</strong> {{ $patient->pekerjaan }}</p>
+                            </div>
+                        </div>
+                    @endforeach
                 @endforeach
-    </div>
+            </div>
         </div>
     </div>  
 </div>
@@ -219,19 +236,19 @@
                     @csrf
                     <div class="mb-3">
                         <label for="patientName" class="form-label">Nama Pasien</label>
-                        <input type="text" class="form-control" name="nama" placeholder="Masukkan nama pasien">
+                        <input type="text" class="form-control" name="nama" placeholder="Masukkan nama pasien" required>
                     </div>
                     <div class="mb-3">
                         <label for="patientAddress" class="form-label">Alamat</label>
-                        <input type="text" class="form-control" name="alamat" placeholder="Masukkan alamat pasien">
+                        <input type="text" class="form-control" name="alamat" placeholder="Masukkan alamat pasien" required>
                     </div>
                     <div class="mb-3">
                         <label for="patientAge" class="form-label">Umur</label>
-                        <input type="number" class="form-control" name="umur" placeholder="Masukkan usia pasien">
+                        <input type="number" class="form-control" name="umur" placeholder="Masukkan usia pasien" required>
                     </div>
                     <div class="mb-3">
                         <label for="patientGender" class="form-label">Jenis Kelamin</label>
-                        <select class="form-select" name="gender">
+                        <select class="form-select" name="gender" required>
                             <option selected disabled>Pilih jenis kelamin</option>
                             <option value="Laki-laki">Laki-laki</option>
                             <option value="Perempuan">Perempuan</option>
@@ -239,15 +256,15 @@
                     </div>
                     <div class="mb-3">
                         <label for="patientEducation" class="form-label">Pendidikan</label>
-                        <input type="text" class="form-control" name="pendidikan" placeholder="Masukkan pendidikan pasien">
+                        <input type="text" class="form-control" name="pendidikan" placeholder="Masukkan pendidikan pasien" required>
                     </div>
                     <div class="mb-3">
                         <label for="patientJob" class="form-label">Pekerjaan</label>
-                        <input type="text" class="form-control" name="pekerjaan" placeholder="Masukkan pekerjaan pasien">
+                        <input type="text" class="form-control" name="pekerjaan" placeholder="Masukkan pekerjaan pasien" required>
                     </div>
                     <div class="mb-3">
                         <label for="patientDate" class="form-label">Tanggal Pemeriksaan</label>
-                        <input type="date" class="form-control" name="tanggal" placeholder="Pilih tanggal">
+                        <input type="date" class="form-control" name="tanggal" placeholder="Pilih tanggal" required>
                     </div>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary">Simpan</button>
@@ -268,25 +285,42 @@
         </div>
     </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
 <script>
-    function searchPatient() {
+    function searchPatient2() {
         var searchQuery = $('#searchInput').val();
 
         $.ajax({
-            url: "{{ route('admin.search.antrian') }}",  // Replace with the correct route
+            url: "{{ route('admin.search.antrian2') }}",
             type: "GET",
             data: { search: searchQuery },
             success: function(data) {
                 $('#patientList').html(data);
+                reinitializeCollapse();
             }
         });
     }
+
+    function reinitializeCollapse() {
+        $('.collapse').off('show.bs.collapse hide.bs.collapse');
+
+        $('.collapse').on('show.bs.collapse', function () {
+            $(this).prev().find('.dropdown-icon').removeClass('bi-chevron-down').addClass('bi-chevron-up');
+        });
+
+        $('.collapse').on('hide.bs.collapse', function () {
+            $(this).prev().find('.dropdown-icon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        });
+    }
+
+    $(document).ready(function () {
+        reinitializeCollapse();
+    });
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
 <script>
     @if(session('success'))
-        var toast = new bootstrap.Toast(document.getElementById('successToast'))
+        var toast = new bootstrap.Toast(document.getElementById('successToast'));
         toast.show();
     @endif
 </script>

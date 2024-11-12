@@ -11,13 +11,53 @@ class AdminController extends Controller
     }
 
     public function daftarantrian(){
-        $data=pasien::all();
+        $data = Pasien::whereIn('status', ['antri', 'sedang diperiksa'])->get();
         return view('admin.daftarantrian', compact('data'));
     }
 
     public function rekammedis(){
-        $data=pasien::all();
+        $data = Pasien::all()->groupBy(function($patient) {
+            return \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d M Y');
+        })->map(function($group) {
+            return $group->sortBy('nama_lengkap');
+        });
         return view('admin.rekammedis', compact('data'));
+    }
+    public function deletePatient($id)
+    {
+        // Find the patient by ID
+        $patient = pasien::find($id);
+
+        // Check if the patient exists
+        if (!$patient) {
+            return redirect()->back()->with('error', 'Patient not found.');
+        }
+
+        // Delete the patient
+        $patient->delete();
+
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Patient deleted successfully.');
+    }
+    public function editPatient(Request $request, $id)
+    {
+        // Find the patient record by ID
+        $patient = Pasien::findOrFail($id);
+
+        // Update the patient details with form input
+        $patient->nama_lengkap = $request->input('nama');
+        $patient->alamat = $request->input('alamat');
+        $patient->umur = $request->input('umur');
+        $patient->gender = $request->input('gender');
+        $patient->pendidikan = $request->input('pendidikan');
+        $patient->pekerjaan = $request->input('pekerjaan');
+        $patient->tanggal_pemeriksaan = $request->input('tanggal_pemeriksaan');
+
+        // Save the changes to the database
+        $patient->save();
+
+        // Redirect back with a success message
+        return redirect()->back()->with('success', 'Data pasien berhasil diubah.');
     }
 
 
@@ -36,37 +76,60 @@ class AdminController extends Controller
     }
 
 
+  
     public function searchAntrian(Request $request)
-    {
-    $searchQuery = $request->input('search');
-    $data = Pasien::where('nama_lengkap', 'LIKE', '%' . $searchQuery . '%')->get();
+        {
+            $search = $request->input('search');
+            $data = Pasien::where('nama_lengkap', 'LIKE', '%' . $search . '%')->get();
+        
+            // Mengembalikan tampilan parsial untuk daftar pasien
+            return view('admin.partials.patient_list', compact('data'))->render();
+        }
+        public function searchAntrian2(Request $request)
+        {
+            $search = $request->input('search');
+    $data = Pasien::where('nama_lengkap', 'LIKE', '%' . $search . '%')
+        ->orderBy('tanggal_pemeriksaan')
+        ->get()
+        ->groupBy(function($item) {
+            return \Carbon\Carbon::parse($item->tanggal_pemeriksaan)->format('d F Y');
+        });
 
-    $output = '';
-    foreach ($data as $index => $patient) {
-        $output .= '
-            <div class="patient-list" data-bs-toggle="collapse" data-bs-target="#collapsePatient' . $index . '" aria-expanded="false" aria-controls="collapsePatient' . $index . '">
-                ' . ($index + 1) . '. ' . $patient->nama_lengkap . '
-                <i class="dropdown-icon bi bi-chevron-down collapsed"></i>
-            </div>
-            <div id="collapsePatient' . $index . '" class="collapse">
-                <div class="p-3">
-                    <p><strong>Tanggal Pemeriksaan:</strong> ' . \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d/m/Y') . '</p>
-                    <p><strong>Nama:</strong> ' . $patient->nama_lengkap . '</p>
-                    <p><strong>Alamat:</strong> ' . $patient->alamat . '</p>
-                    <p><strong>Umur:</strong> ' . $patient->umur . '</p>
-                    <p><strong>Gender:</strong> ' . $patient->gender . '</p>
-                    <p><strong>Pendidikan:</strong> ' . $patient->pendidikan . '</p>
-                    <p><strong>Pekerjaan:</strong> ' . $patient->pekerjaan . '</p>
-                </div>
-            </div>';
-    }
+    // Render the partial view and return it as a response for AJAX
+    return view('admin.partials.patient_list_rm', compact('data'))->render();
+        }
+    public function markAsCompleted($id)
+        {
+            $patient = Pasien::findOrFail($id);
+            $patient->status = 'selesai';
+            $patient->save();
+        
+            return redirect()->back()->with('success', 'Pasien telah selesai.');
+        }
+        public function markAsInProgress($id)
+        {
+            $patient = Pasien::findOrFail($id);
+            $patient->status = 'sedang diperiksa';
+            $patient->save();
+        
+            return redirect()->back()->with('success', 'Pasien sedang diperiksa.');
+        }
+        
+        public function updateStatus($id)
+        {
+            // Temukan pasien berdasarkan ID
+            $patient = Pasien::find($id);
+        
+            if ($patient) {
+                // Update status pasien
+                $patient->status = 'sedang diperiksa';
+                $patient->save();
+        
+                return response()->json(['success' => true, 'message' => 'Status pasien diperbarui.']);
+            }
+        
+            return response()->json(['success' => false, 'message' => 'Pasien tidak ditemukan.']);
+        }
 
-    // If no patients are found
-    if ($output == '') {
-        $output = '<div class="text-center text-muted">No patients found</div>';
-    }
-
-    return response($output);
-    }
-
+        
 }

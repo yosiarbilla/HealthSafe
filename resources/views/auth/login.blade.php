@@ -1,6 +1,20 @@
 <x-guest-layout>
 <head>
     <style>
+        /* Reset margin, padding, and box-sizing for all elements */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Set HTML and body to occupy full viewport without overflow */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
         /* Container for full-screen login page */
         .login-container {
             display: flex;
@@ -10,34 +24,36 @@
             padding: 0;
         }
 
-        /* Styling for the form section on the left with reduced width */
+        /* Styling for the form section on the left */
         .form-section {
             background: linear-gradient(196.32deg, #97EEC8 0.87%, #0085AA 100%);
             color: white;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            width: 40vw; /* Reduced width to move it to the left */
+            justify-content: center;
             flex-direction: column;
+            width: 50vw; /* Forces half of the screen width */
+            height: 100vh;
         }
 
-        /* Logo styling outside the form box */
+        /* Logo styling */
         .logo-container {
             margin-bottom: 1rem;
         }
 
         .Logo-img {
-            width: 300px;
+            width: 150px;
+            max-width: 100%;
         }
 
-        /* Rounded form container within the form section */
+        /* Rounded form container */
         .form-box {
-            background-color: #FFFFFF99; /* Light background for the box */
+            background-color: #FFFFFF99;
             padding: 2rem;
-            border-radius: 20px; /* Rounded corners */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Soft shadow */
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 400px; /* Limit box width */
+            max-width: 400px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -45,7 +61,7 @@
 
         /* Form input styling */
         .form-label {
-            color: #0072ff; /* Text color to match design */
+            color: #0072ff;
             font-weight: bold;
         }
 
@@ -58,13 +74,10 @@
             font-size: 1rem;
             color: #333333;
             margin-bottom: 1rem;
+            width: 100%;
         }
 
-        /* Checkbox and button styling */
-        .form-check-label {
-            color: #0072ff;
-        }
-
+        /* Button styling */
         .btn {
             border-radius: 20px;
             padding: 10px 20px;
@@ -86,15 +99,16 @@
             text-decoration: none;
         }
 
-        /* Image section styling on the right with increased width */
+        /* Image section styling on the right */
         .image-section {
-            width: 60vw; /* Increased width to fill remaining space */
+            width: 50vw; /* Forces half of the screen width */
+            height: 100vh;
             overflow: hidden;
         }
 
         .image-section img {
             object-fit: cover;
-            height: 100vh;
+            height: 100%;
             width: 100%;
         }
 
@@ -102,14 +116,26 @@
         @media (max-width: 768px) {
             .login-container {
                 flex-direction: column;
+                height: auto;
             }
 
             .form-section, .image-section {
-                width: 100vw; /* Full width for each section on smaller screens */
+                width: 100vw;
+                height: 50vh;
             }
 
             .image-section img {
-                height: 50vh; /* Adjust image height on small screens */
+                height: 50vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-box {
+                padding: 1rem;
+            }
+
+            .Logo-img {
+                width: 100px;
             }
         }
     </style>
@@ -131,7 +157,7 @@
 
                     <!-- Email Address -->
                     <div class="mb-3">
-                        <label for="email" class="form-label">{{ __('Username') }}</label>
+                        <label for="email" class="form-label">{{ __('Email') }}</label>
                         <input id="email" type="email" name="email" class="form-control" :value="old('email')" required autofocus autocomplete="username">
                         <x-input-error :messages="$errors->get('email')" class="text-danger mt-2" />
                     </div>

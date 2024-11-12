@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('pekerjaan'); // Job
             $table->date('tanggal_pemeriksaan'); // Examination Date
             $table->timestamps();
+            $table->string('status')->default('antri');
         });
     }
 
@@ -30,5 +31,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('pasiens');
+        $table->dropColumn('status');
     }
 };
