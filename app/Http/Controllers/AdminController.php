@@ -131,5 +131,11 @@ class AdminController extends Controller
             return response()->json(['success' => false, 'message' => 'Pasien tidak ditemukan.']);
         }
 
-        
+        public function searchSuggestions(Request $request)
+            {
+                $search = $request->input('search');
+                $patients = Pasien::where('nama_lengkap', 'LIKE', "%{$search}%")->limit(5)->get(['nama_lengkap']);
+                return response()->json($patients);
+            }
+
 }

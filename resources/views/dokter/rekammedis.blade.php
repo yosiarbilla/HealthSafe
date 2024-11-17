@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekam Medis</title>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+
     <style>
         /* General layout styling */
         body {
@@ -117,15 +122,29 @@
         }
 
         /* View Details Button */
-        .btn-view-details {
-            background-color: #0085AA;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
+        /* View Details Button */
+.btn-view-details {
+    background-color: #0085AA;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* Delete Button */
+.btn-delete {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
     </style>
 </head>
 <body>
@@ -154,12 +173,16 @@
             <!-- Patient List -->
             <div id="patientList">
                 @foreach($data as $index => $patient)
-                    <div class="patient-list">
+                    <div class="patient-list" data-id="{{ $patient->id }}">
                         <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{ $patient->nama_lengkap }}</span>
-                        <a href="{{ route('dokter.lihatdetail', ['id' => $patient->id]) }}" class="btn-view-details">Lihat Detail</a>
+                        <div>
+                            <a href="{{ route('dokter.lihatdetail', ['id' => $patient->id]) }}" class="btn-view-details">Lihat Detail</a>
+                            <button onclick="deletePatient({{ $patient->id }})" class="btn-delete">Hapus</button>
+                        </div>
                     </div>
                 @endforeach
             </div>
+
         </div>
     </div>
 </div>
@@ -178,6 +201,42 @@
             }
         });
     }
+    function deletePatient(patientId) {
+    swal({
+        title: "Apakah Anda yakin?",
+        text: "Data pasien akan dihapus secara permanen!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    }).then((willDelete) => {
+        if (willDelete) {
+            $.ajax({
+                url: "{{ url('/dokter/delete') }}/" + patientId,
+                type: "DELETE",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Menghapus elemen pasien dari daftar
+                        $(`#patientList .patient-list[data-id="${patientId}"]`).remove();
+
+                        swal("Berhasil!", "Data pasien berhasil dihapus.", "success");
+                    } else {
+                        swal("Gagal!", "Data pasien gagal dihapus.", "error");
+                    }
+                },
+                error: function(xhr) {
+                    console.error("Error response:", xhr.responseText);
+                    swal("Error!", "Terjadi kesalahan saat menghapus data pasien.", "error");
+                }
+            });
+        } else {
+            swal("Data pasien aman!");
+        }
+    });
+}
+
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>

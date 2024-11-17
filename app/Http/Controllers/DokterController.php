@@ -19,7 +19,7 @@ class DokterController extends Controller
     }
 
     public function lihatdetail($id) {
-        $data = Pasien::findOrFail($id); // Retrieve the patient data based on the ID
+        $data = Pasien::with('examinations')->find($id); // Make sure 'examinations' is the correct relationship name
         return view('dokter.lihatdetail', compact('data'));
     }
     
@@ -83,28 +83,29 @@ public function markAsCompleted($id)
         }
         public function saveExamination(Request $request)
 {
-    // Validate the incoming request data
-    $request->validate([
-        'id' => 'required|exists:pasiens,id',  // Ensures that 'id' exists in the 'pasiens' table
-        'keluhan' => 'required|string',
-        'diagnosis' => 'required|string',
-        'obat' => 'required|string',
-    ]);
+    $patient = Pasien::find($request->id); // Sesuaikan dengan ID yang dikirim dari form
+    if ($patient) {
+        $patient->keluhan = $request->keluhan;
+        $patient->diagnosis = $request->diagnosis;
+        $patient->obat = $request->obat;
+        $patient->status = 'selesai'; // Ubah status pasien menjadi 'selesai'
+        $patient->save();
 
-    // Retrieve the patient record based on the id
-    $patient = Pasien::find($request->id);
+        return response()->json(['success' => true, 'message' => 'Examination data saved successfully']);
+    }
 
-    // Update the patient record with the new examination data
-    $patient->keluhan = $request->keluhan;
-    $patient->diagnosis = $request->diagnosis;
-    $patient->obat = $request->obat;
-    $patient->status = 'selesai'; // Assuming you want to mark the examination as complete
-
-    // Save the updated record to the database
-    $patient->save();
-
-    // Optionally, redirect or return a success response
-    return response()->json(['message' => 'Examination data saved successfully'], 200);
+    return response()->json(['success' => false, 'message' => 'Patient not found']);
 }
+public function deletePatient($id)
+{
+    $patient = Pasien::find($id);
+    if ($patient) {
+        $patient->delete();
+        return response()->json(['success' => true, 'message' => 'Data pasien berhasil dihapus.']);
+    }
+
+    return response()->json(['success' => false, 'message' => 'Data pasien tidak ditemukan.']);
+}
+
 
 }

@@ -168,6 +168,32 @@
             transform: translateX(-50%);
             z-index: 11;
         }
+        .suggestion-box {
+    background-color: #d6f5f7;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    position: absolute;
+    top: 130px; /* Adjust this based on the position */
+    z-index: 10;
+    width: 90%; /* To match the width of the search bar */
+    max-height: 150px;
+    max-width: 400px;
+    overflow-y: auto;
+    display: none; /* This will be set to display:block dynamically */
+}
+
+.suggestion-item {
+    padding: 8px;
+    cursor: pointer;
+    color: #0085AA;
+    font-weight: bold;
+}
+
+.suggestion-item:hover {
+    background-color: #e0f7fa;
+}
+
     </style>
 </head>
 <body>
@@ -190,14 +216,14 @@
             <div class="search-bar">
                 <i class="bi bi-search"></i>
                 <input type="text" name="search" id="searchInput" placeholder="Masukkan Nama Pasien" onkeyup="searchPatient()">
+                
             </div>
 
-            <!-- Add Patient Button with "+" icon -->
-            <button class="add-patient-btn" data-bs-toggle="modal" data-bs-target="#addPatientModal">
-                <i class="bi bi-plus-lg"></i> Tambah Pasien
-            </button>
 
+            <!-- Add Patient Button with "+" icon -->
+            <div id="suggestions" class="suggestion-box"></div>
             <!-- Total Count -->
+             
             <div class="total-count">Total Antrian: {{ $data->count() }}</div>
 
             <!-- Patient List -->
@@ -206,7 +232,7 @@
                 <div class="patient-list d-flex justify-content-between align-items-center">
                 <!-- Informasi Pasien dengan Chevron -->
                     <div class="patient-info d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#collapsePatient{{ $index }}" aria-expanded="false" aria-controls="collapsePatient{{ $index }}">
-                        <span> {{$patient->nama_lengkap}}</span>
+                        <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{$patient->nama_lengkap}}</span>
                         <!-- Ikon Chevron -->
                          <span class="ms-3 badge 
                 @if($patient->status === 'sedang diperiksa') bg-danger 
@@ -368,24 +394,38 @@
 <script>
 
 function searchPatient() {
-    var searchQuery = $('#searchInput').val();
+    let searchQuery = $('#searchInput').val();
 
-    $.ajax({
-        url: "{{ route('admin.search.antrian') }}",
-        type: "GET",
-        data: { search: searchQuery },
-        success: function(response) {
-            // Replace the patient list with the new partial content
-            $('#patientList').html(response);
-
-            // Reinitialize event listeners for dynamic content
-            initializeDynamicListeners();
-        },
-        error: function(xhr, status, error) {
-            console.error("Error during search:", error);
-        }
-    });
+    if (searchQuery.length > 0) {
+        $.ajax({
+            url: "{{ route('admin.search.suggestions') }}", // Adjust this route to match your backend
+            type: "GET",
+            data: { search: searchQuery },
+            success: function(data) {
+                let suggestionsBox = $('#suggestions');
+                suggestionsBox.empty();
+                
+                if (data.length > 0) {
+                    data.forEach(patient => {
+                        suggestionsBox.append(`<div class="suggestion-item" onclick="selectPatient('${patient.nama_lengkap}')">${patient.nama_lengkap}</div>`);
+                    });
+                    suggestionsBox.show();
+                } else {
+                    suggestionsBox.hide();
+                }
+            }
+        });
+    } else {
+        $('#suggestions').hide();
+    }
 }
+
+function selectPatient(name) {
+    $('#searchInput').val(name);
+    $('#suggestions').hide();
+    // You can trigger a search based on the selected name, if needed.
+}
+
 
 function initializeDynamicListeners() {
     // Collapse toggle event listener for chevron icon
@@ -457,6 +497,27 @@ function confirmInProgress(event, patientId) {
     });
 }
 
+function addToQueue(patientName) {
+    $.ajax({
+        url: "{{ url('/admin/tambahantrian') }}", // Use the existing "tambahantrian" route
+        type: "POST",
+        data: {
+            name: patientName,
+            _token: '{{ csrf_token() }}' // Include CSRF token for security
+        },
+        success: function(response) {
+            if (response.success) {
+                swal("Success", patientName + " has been added to the queue.", "success");
+                // Optionally, update the queue list to reflect the new addition
+            } else {
+                swal("Error", "Failed to add " + patientName + " to the queue.", "error");
+            }
+        },
+        error: function(error) {
+            swal("Error", "An error occurred while adding to the queue.", "error");
+        }
+    });
+}
 
 </script>
 

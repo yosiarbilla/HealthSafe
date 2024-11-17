@@ -34,6 +34,7 @@ route::middleware(['auth', Admin::class])->group(function(){
     Route::put('/admin/mark-as-completed/{id}', [AdminController::class, 'markAsCompleted'])->name('admin.markAsCompleted');
     Route::put('/admin/mark-as-in-progress/{id}', [AdminController::class, 'markAsInProgress'])->name('admin.markAsInProgress');
     Route::post('/admin/patient/{id}/update-status', [AdminController::class, 'updateStatus'])->name('admin.patient.updateStatus');
+    Route::get('/admin/search/suggestions', [AdminController::class, 'searchSuggestions'])->name('admin.search.suggestions');
 
 });
 route::middleware(['auth', Dokter::class])->group(function(){
@@ -41,6 +42,7 @@ route::middleware(['auth', Dokter::class])->group(function(){
     route::get('/dokter/daftarantrian', [DokterController::class, 'daftarantrian'])->name('dokter.daftarantrian');    
     Route::get('/dokter/search-antrian', [DokterController::class, 'searchAntrian'])->name('dokter.search.antrian');
     Route::get('/dokter/rekam-medis', [DokterController::class, 'rekammedis'])->name('dokter.rekammedis');
+    Route::delete('/dokter/delete/{id}', [DokterController::class, 'deletePatient'])->name('dokter.delete');
 
     Route::get('/dokter/detailpasien/{id}', [DokterController::class, 'lihatdetail'])->name('dokter.lihatdetail');
     Route::put('/dokter/mark-as-completed/{id}', [DokterController::class, 'markAsCompleted'])->name('dokter.markAsCompleted');

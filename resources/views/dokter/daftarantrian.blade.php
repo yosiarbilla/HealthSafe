@@ -132,7 +132,7 @@
             <div class="total-count">Total Antrian: {{ $data->count() }}</div>
             <div id="patientList">
                 @foreach($data as $index => $patient)
-                <div class="patient-list d-flex justify-content-between align-items-center">
+                <div class="patient-list d-flex justify-content-between align-items-center" data-id="{{ $patient->id }}">
                     <div class="patient-info d-flex align-items-center">
                         <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{$patient->nama_lengkap}}</span>
                         <span class="ms-3 badge 
@@ -156,6 +156,7 @@
                         })">Periksa</button>
                     </div>
                 </div>
+
                 @endforeach
             </div>
         </div>
@@ -206,7 +207,7 @@
 function searchPatient() {
     var searchQuery = $('#searchInput').val();
     $.ajax({
-        url: "{{ route('admin.search.antrian') }}",
+        url: "{{ route('dokter.search.antrian') }}",
         type: "GET",
         data: { search: searchQuery },
         success: function(response) {
@@ -295,49 +296,68 @@ function handleFormSubmit(event) {
     return false;
 }
 function openExamineModal(patient) {
-        document.getElementById('patientId').value = patient.id;
-        document.getElementById('tanggalPemeriksaan').innerText = patient.tanggal_pemeriksaan;
-        document.getElementById('namaPasien').innerText = patient.nama_lengkap;
-        document.getElementById('alamatPasien').innerText = patient.alamat;
-        document.getElementById('umurPasien').innerText = patient.umur;
-        document.getElementById('genderPasien').innerText = patient.gender;
-        document.getElementById('pendidikanPasien').innerText = patient.pendidikan;
-        document.getElementById('pekerjaanPasien').innerText = patient.pekerjaan;
+    document.getElementById('patientId').value = patient.id;
+    document.getElementById('tanggalPemeriksaan').innerText = patient.tanggal_pemeriksaan;
+    document.getElementById('namaPasien').innerText = patient.nama_lengkap;
+    document.getElementById('alamatPasien').innerText = patient.alamat;
+    document.getElementById('umurPasien').innerText = patient.umur;
+    document.getElementById('genderPasien').innerText = patient.gender;
+    document.getElementById('pendidikanPasien').innerText = patient.pendidikan;
+    document.getElementById('pekerjaanPasien').innerText = patient.pekerjaan;
 
-        $('#examineModal').modal('show');
-    }
+    $('#examineModal').modal('show');
+}
 
-    // Configure CSRF token for AJAX requests
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+$('#examinationForm').on('submit', function(e) {
+    e.preventDefault();
+
+    $.ajax({
+        url: "{{ route('dokter.saveExamination') }}",
+        type: "POST",
+        data: $(this).serialize(),
+        success: function(response) {
+            if (response.success) {
+                // Tutup modal setelah simpan berhasil
+                $('#examineModal').modal('hide');
+
+                // Ambil ID pasien dari form
+                const patientId = $('#patientId').val();
+
+                // Ubah status di daftar antrian menjadi 'selesai'
+                $(`#patientList .patient-list[data-id="${patientId}"] .badge`)
+                    .removeClass('bg-secondary').addClass('bg-success').text('Selesai');
+
+                // Hapus pasien dari daftar setelah perubahan status
+                $(`#patientList .patient-list[data-id="${patientId}"]`).remove();
+
+                // Tampilkan pesan sukses
+                swal({
+                    title: "Berhasil!",
+                    text: response.message,
+                    icon: "success",
+                    button: "OK",
+                });
+            } else {
+                swal({
+                    title: "Error",
+                    text: response.message,
+                    icon: "error",
+                    button: "OK",
+                });
+            }
+        },
+        error: function(xhr) {
+            console.error("Error response:", xhr.responseText);
+            swal({
+                title: "Error",
+                text: "Terjadi kesalahan saat menyimpan data. Silakan coba lagi.",
+                icon: "error",
+                button: "OK",
+            });
         }
     });
-
-    // Handle the examination form submission with AJAX
-    $('#examinationForm').on('submit', function(e) {
-        e.preventDefault();
-
-        $.ajax({
-    url: "{{ route('dokter.saveExamination') }}",
-    type: "POST",
-    data: $(this).serialize(),
-    success: function(response) {
-        console.log("Server response:", response);
-        if (response.success) {
-            $('#examineModal').modal('hide');
-            $('#patientList').find(`[data-patient-id="${$('#patientId').val()}"]`).remove();
-            alert('Data saved successfully and moved to Rekam Medis.');
-        } else {
-            alert('Error saving data: ' + response.message);
-        }
-    },
-    error: function(xhr) {
-        console.error("Error response:", xhr.responseText);
-        alert('An error occurred. Please try again.');
-    }
 });
-    });
+
 
 
 </script>

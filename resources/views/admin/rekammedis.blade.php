@@ -187,7 +187,9 @@
             </div>
 
             <!-- Add Patient Button with "+" icon -->
-            
+            <button class="add-patient-btn" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+                <i class="bi bi-plus-lg"></i> Tambah Pasien
+            </button>
 
             
 
