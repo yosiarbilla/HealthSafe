@@ -152,7 +152,7 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 11;
-            
+
         }
         .examination-date {
     font-weight: bold;
@@ -191,14 +191,14 @@
                 <i class="bi bi-plus-lg"></i> Tambah Pasien
             </button>
 
-            
+
 
             <!-- Patient List -->
             <div id="patientList">
                 @foreach($data as $date => $patients)
                     <!-- Examination Date Header -->
                     <h4 class="examination-date">{{ $date }}</h4>
-                    
+
                     <!-- List of Patients for this Date -->
                     @foreach($patients as $patient)
                         <div class="patient-list d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapsePatient{{ $patient->id }}" aria-expanded="false" aria-controls="collapsePatient{{ $patient->id }}">
@@ -222,7 +222,7 @@
                 @endforeach
             </div>
         </div>
-    </div>  
+    </div>
 </div>
 
 <!-- Add Patient Modal -->
@@ -234,7 +234,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="{{ url('/admin/tambahantrian') }}" method="POST">
+                <form action="{{ url('/admin/tambahpasien') }}" method="POST">
                     @csrf
                     <div class="mb-3">
                         <label for="patientName" class="form-label">Nama Pasien</label>

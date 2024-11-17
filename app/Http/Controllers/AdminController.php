@@ -147,5 +147,18 @@ class AdminController extends Controller
             Log::info($patients); // Debug log pasien yang ditemukan
             return response()->json($patients);
         }
+        public function tambahpasien(Request $request){
+            $data = new pasien;
+            $data->nama_lengkap = $request->nama;
+            $data->alamat = $request->alamat;
+            $data->umur = $request->umur;
+            $data->gender = $request->gender;
+            $data->pendidikan = $request->pendidikan;
+            $data->pekerjaan = $request->pekerjaan;
+            $data->tanggal_pemeriksaan = $request->tanggal;
+            $data->save();
+
+            return redirect()->back()->with('success', 'Pasien berhasil ditambahkan!');
+        }
 
 }

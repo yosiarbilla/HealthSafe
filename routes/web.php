@@ -26,6 +26,7 @@ route::middleware(['auth', Admin::class])->group(function(){
     route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     route::get('/admin/daftarantrian', [AdminController::class, 'daftarantrian'])->name('admin.daftarantrian');
     route::post('/admin/tambahantrian', [AdminController::class, 'tambahantrian'])->name('admin.tambahantrian');
+    route::post('/admin/tambahpasien', [AdminController::class, 'tambahpasien'])->name('admin.tambahpasien');
     Route::get('/admin/search-antrian', [AdminController::class, 'searchAntrian'])->name('admin.search.antrian');
     Route::get('/admin/search-antrian2', [AdminController::class, 'searchAntrian2'])->name('admin.search.antrian2');
     Route::get('/admin/rekam-medis', [AdminController::class, 'rekammedis'])->name('admin.rekammedis');
