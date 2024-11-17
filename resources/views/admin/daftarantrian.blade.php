@@ -216,14 +216,14 @@
             <div class="search-bar">
                 <i class="bi bi-search"></i>
                 <input type="text" name="search" id="searchInput" placeholder="Masukkan Nama Pasien" onkeyup="searchPatient()">
-                
+
             </div>
 
 
             <!-- Add Patient Button with "+" icon -->
             <div id="suggestions" class="suggestion-box"></div>
             <!-- Total Count -->
-             
+
             <div class="total-count">Total Antrian: {{ $data->count() }}</div>
 
             <!-- Patient List -->
@@ -234,17 +234,17 @@
                     <div class="patient-info d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#collapsePatient{{ $index }}" aria-expanded="false" aria-controls="collapsePatient{{ $index }}">
                         <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{$patient->nama_lengkap}}</span>
                         <!-- Ikon Chevron -->
-                         <span class="ms-3 badge 
-                @if($patient->status === 'sedang diperiksa') bg-danger 
-                @elseif($patient->status === 'selesai') bg-success 
-                @else bg-secondary 
+                         <span class="ms-3 badge
+                @if($patient->status === 'sedang diperiksa') bg-danger
+                @elseif($patient->status === 'selesai') bg-success
+                @else bg-secondary
                 @endif">
                 {{ ucfirst($patient->status) }}
             </span>
                         <i id="arrowIcon{{ $index }}" class="bi bi-chevron-down chevron-icon ms-2"></i>
                     </div>
                         <div class ="button-group ms-auto">
-                        
+
 
                         <button class="btn btn-info btn-sm" onclick="confirmInProgress(event, {{ $patient->id }})">Ubah Status</button> &nbsp;&nbsp;
                             <form action="{{ route('admin.markAsInProgress', $patient->id) }}" method="POST" id="inProgressForm{{ $patient->id }}" style="display: none;">
@@ -261,7 +261,7 @@
 
                             <!-- Edit Button -->
                             <button class="btn btn-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editPatientModal{{ $index }}">Edit</button>
-                            
+
                             <!-- Delete Button -->
                             <form action="{{ route('admin.delete.antrian', $patient->id) }}" method="POST" style="display:inline;" id="deleteForm{{ $patient->id }}">
     @csrf
@@ -337,7 +337,7 @@
                 @endforeach
             </div>
         </div>
-    </div>  
+    </div>
 </div>
 
 
@@ -362,7 +362,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="patientAge" class="form-label">Umur</label>
-                        <input type="number" class="form-control" name="umur" placeholder="Masukkan usia pasien" required> 
+                        <input type="number" class="form-control" name="umur" placeholder="Masukkan usia pasien" required>
                     </div>
                     <div class="mb-3">
                         <label for="patientGender" class="form-label">Jenis Kelamin</label>
@@ -404,10 +404,10 @@ function searchPatient() {
             success: function(data) {
                 let suggestionsBox = $('#suggestions');
                 suggestionsBox.empty();
-                
+
                 if (data.length > 0) {
                     data.forEach(patient => {
-                        suggestionsBox.append(`<div class="suggestion-item" onclick="selectPatient('${patient.nama_lengkap}')">${patient.nama_lengkap}</div>`);
+                        suggestionsBox.append(`<div class="suggestion-item" onclick="selectPatient('${patient.nama_lengkap}', ${patient.id})">${patient.nama_lengkap}</div>`);
                     });
                     suggestionsBox.show();
                 } else {
@@ -420,10 +420,43 @@ function searchPatient() {
     }
 }
 
-function selectPatient(name) {
-    $('#searchInput').val(name);
-    $('#suggestions').hide();
-    // You can trigger a search based on the selected name, if needed.
+function selectPatient(name, id) {
+    console.log("Selected Patient Name:", name);
+    console.log("Selected Patient ID:", id);
+
+    if (!id) {
+        swal("Gagal", "ID pasien tidak valid.", "error");
+        return;
+    }
+
+    $('#searchInput').val(name); // Set nama di input pencarian
+    $('#suggestions').hide(); // Sembunyikan suggestion box
+
+    // Kirim request ke server
+    $.ajax({
+        url: "{{ url('/admin/tambahantrian') }}",
+        type: "POST",
+        data: {
+            id: id, // Kirim ID pasien
+            _token: '{{ csrf_token() }}' // Sertakan CSRF token
+        },
+        success: function(response) {
+            if (response.success) {
+                swal("Berhasil", response.message, "success");
+                location.reload(); // Reload halaman
+            } else {
+                swal("Gagal", response.message, "error");
+            }
+        },
+        error: function(xhr) {
+            let errorResponse = JSON.parse(xhr.responseText);
+            if (errorResponse.errors && errorResponse.errors.id) {
+                swal("Gagal", errorResponse.errors.id[0], "error");
+            } else {
+                swal("Gagal", "Terjadi kesalahan tidak terduga.", "error");
+            }
+        }
+    });
 }
 
 
@@ -542,7 +575,7 @@ function addToQueue(patientName) {
         });
     }
 </script>
-    
+
 
 
 </body>

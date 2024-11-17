@@ -39,7 +39,7 @@ route::middleware(['auth', Admin::class])->group(function(){
 });
 route::middleware(['auth', Dokter::class])->group(function(){
     route::get('/dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
-    route::get('/dokter/daftarantrian', [DokterController::class, 'daftarantrian'])->name('dokter.daftarantrian');    
+    route::get('/dokter/daftarantrian', [DokterController::class, 'daftarantrian'])->name('dokter.daftarantrian');
     Route::get('/dokter/search-antrian', [DokterController::class, 'searchAntrian'])->name('dokter.search.antrian');
     Route::get('/dokter/rekam-medis', [DokterController::class, 'rekammedis'])->name('dokter.rekammedis');
     Route::delete('/dokter/delete/{id}', [DokterController::class, 'deletePatient'])->name('dokter.delete');

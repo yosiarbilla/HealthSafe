@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pasien;
+use Illuminate\Support\Facades\Log;
 class AdminController extends Controller
 {
     public function index(){
@@ -61,31 +62,36 @@ class AdminController extends Controller
     }
 
 
-    public function tambahantrian(Request $request){
-        $data = new pasien;
-        $data->nama_lengkap = $request->nama;
-        $data->alamat = $request->alamat;
-        $data->umur = $request->umur;
-        $data->gender = $request->gender;
-        $data->pendidikan = $request->pendidikan;
-        $data->pekerjaan = $request->pekerjaan;
-        $data->tanggal_pemeriksaan = $request->tanggal;
-        $data->save();
-    
-        return redirect()->back()->with('success', 'Pasien berhasil ditambahkan!');
+    public function tambahantrian(Request $request)
+    {
+        Log::info($request->all()); // Log input untuk debugging
+
+        $request->validate([
+            'id' => 'required|exists:pasiens,id',
+        ]);
+
+        $patient = Pasien::find($request->id);
+        $patient->status = 'antri';
+
+        try {
+            $patient->save();
+            return response()->json(['success' => true, 'message' => 'Pasien berhasil ditambahkan ke antrian.']);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage()); // Log error
+            return response()->json(['success' => false, 'message' => 'Gagal menambahkan pasien ke antrian.']);
+        }
     }
 
 
-  
     public function searchAntrian(Request $request)
         {
             $search = $request->input('search');
             $data = Pasien::where('nama_lengkap', 'LIKE', '%' . $search . '%')->get();
-        
+
             // Mengembalikan tampilan parsial untuk daftar pasien
             return view('admin.partials.patient_list', compact('data'))->render();
         }
-        public function searchAntrian2(Request $request)
+    public function searchAntrian2(Request $request)
         {
             $search = $request->input('search');
     $data = Pasien::where('nama_lengkap', 'LIKE', '%' . $search . '%')
@@ -103,7 +109,7 @@ class AdminController extends Controller
             $patient = Pasien::findOrFail($id);
             $patient->status = 'selesai';
             $patient->save();
-        
+
             return redirect()->back()->with('success', 'Pasien telah selesai.');
         }
         public function markAsInProgress($id)
@@ -111,31 +117,35 @@ class AdminController extends Controller
             $patient = Pasien::findOrFail($id);
             $patient->status = 'sedang diperiksa';
             $patient->save();
-        
+
             return redirect()->back()->with('success', 'Pasien sedang diperiksa.');
         }
-        
+
         public function updateStatus($id)
         {
             // Temukan pasien berdasarkan ID
             $patient = Pasien::find($id);
-        
+
             if ($patient) {
                 // Update status pasien
                 $patient->status = 'sedang diperiksa';
                 $patient->save();
-        
+
                 return response()->json(['success' => true, 'message' => 'Status pasien diperbarui.']);
             }
-        
+
             return response()->json(['success' => false, 'message' => 'Pasien tidak ditemukan.']);
         }
 
         public function searchSuggestions(Request $request)
-            {
-                $search = $request->input('search');
-                $patients = Pasien::where('nama_lengkap', 'LIKE', "%{$search}%")->limit(5)->get(['nama_lengkap']);
-                return response()->json($patients);
-            }
+        {
+            $search = $request->input('search');
+            $patients = Pasien::where('nama_lengkap', 'LIKE', "%{$search}%")
+                ->limit(5)
+                ->get(['id', 'nama_lengkap']); // Pastikan 'id' dan 'nama_lengkap' dipilih
+
+            Log::info($patients); // Debug log pasien yang ditemukan
+            return response()->json($patients);
+        }
 
 }
