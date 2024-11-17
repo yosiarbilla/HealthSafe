@@ -11,10 +11,15 @@ class AdminController extends Controller
         return view('admin.dashboard');
     }
 
-    public function daftarantrian(){
-        $data = Pasien::whereIn('status', ['antri', 'sedang diperiksa'])->get();
+    public function daftarantrian()
+    {
+        $data = Pasien::where('status', 'antri')
+            ->orderBy('nomor_antrian', 'asc')
+            ->get();
+
         return view('admin.daftarantrian', compact('data'));
     }
+
 
     public function rekammedis(){
         $data = Pasien::all()->groupBy(function($patient) {
@@ -60,18 +65,18 @@ class AdminController extends Controller
         // Redirect back with a success message
         return redirect()->back()->with('success', 'Data pasien berhasil diubah.');
     }
-
-
     public function tambahantrian(Request $request)
     {
-        Log::info($request->all()); // Log input untuk debugging
-
         $request->validate([
             'id' => 'required|exists:pasiens,id',
         ]);
 
         $patient = Pasien::find($request->id);
         $patient->status = 'antri';
+        $patient->nomor_antrian = Pasien::where('status', 'antri')->max('nomor_antrian') + 1; // Set nomor antrean terakhir + 1
+        $patient->save();
+
+        Pasien::resetQueue();
 
         try {
             $patient->save();
@@ -108,7 +113,10 @@ class AdminController extends Controller
         {
             $patient = Pasien::findOrFail($id);
             $patient->status = 'selesai';
+            $patient->nomor_antrian = null;
             $patient->save();
+
+            Pasien::resetQueue();
 
             return redirect()->back()->with('success', 'Pasien telah selesai.');
         }
@@ -117,6 +125,8 @@ class AdminController extends Controller
             $patient = Pasien::findOrFail($id);
             $patient->status = 'sedang diperiksa';
             $patient->save();
+
+            Pasien::resetQueue();
 
             return redirect()->back()->with('success', 'Pasien sedang diperiksa.');
         }
@@ -160,5 +170,6 @@ class AdminController extends Controller
 
             return redirect()->back()->with('success', 'Pasien berhasil ditambahkan!');
         }
+
 
 }

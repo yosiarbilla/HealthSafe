@@ -2,19 +2,20 @@
                 <div class="patient-list d-flex justify-content-between align-items-center">
                 <!-- Informasi Pasien dengan Chevron -->
                     <div class="patient-info d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#collapsePatient{{ $index }}" aria-expanded="false" aria-controls="collapsePatient{{ $index }}">
-                        <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{$patient->nama_lengkap}}</span>
+                        <span>{{ $patient->nomor_antrian }}.&nbsp;&nbsp; {{$patient->nama_lengkap}}</span>
+
                         <!-- Ikon Chevron -->
-                         <span class="ms-3 badge 
-                @if($patient->status === 'sedang diperiksa') bg-danger 
-                @elseif($patient->status === 'selesai') bg-success 
-                @else bg-secondary 
+                         <span class="ms-3 badge
+                @if($patient->status === 'sedang diperiksa') bg-danger
+                @elseif($patient->status === 'selesai') bg-success
+                @else bg-secondary
                 @endif">
                 {{ ucfirst($patient->status) }}
             </span>
                         <i id="arrowIcon{{ $index }}" class="bi bi-chevron-down chevron-icon ms-2"></i>
                     </div>
                         <div class ="button-group ms-auto">
-                        
+
 
                         <button class="btn btn-info btn-sm" onclick="confirmInProgress(event, {{ $patient->id }})">Ubah Status</button> &nbsp;&nbsp;
                             <form action="{{ route('admin.markAsInProgress', $patient->id) }}" method="POST" id="inProgressForm{{ $patient->id }}" style="display: none;">
@@ -31,7 +32,7 @@
 
                             <!-- Edit Button -->
                             <button class="btn btn-warning btn-sm me-2" data-bs-toggle="modal" data-bs-target="#editPatientModal{{ $index }}">Edit</button>
-                            
+
                             <!-- Delete Button -->
                             <form action="{{ route('admin.delete.antrian', $patient->id) }}" method="POST" style="display:inline;" id="deleteForm{{ $patient->id }}">
     @csrf
@@ -221,5 +222,5 @@ function confirmInProgress(event, patientId) {
         });
     }
 </script>
-    
-    
+
+
