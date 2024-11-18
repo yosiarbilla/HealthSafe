@@ -197,8 +197,6 @@
             <div id="patientList">
                 @foreach($data as $date => $patients)
                     <!-- Examination Date Header -->
-                    <h4 class="examination-date">{{ $date }}</h4>
-
                     <!-- List of Patients for this Date -->
                     @foreach($patients as $patient)
                         <div class="patient-list d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapsePatient{{ $patient->id }}" aria-expanded="false" aria-controls="collapsePatient{{ $patient->id }}">

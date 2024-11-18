@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Antrian;
 use Illuminate\Http\Request;
 use App\Models\Pasien;
 use Illuminate\Support\Facades\Log;
@@ -13,9 +14,10 @@ class AdminController extends Controller
 
     public function daftarantrian()
     {
-        $data = Pasien::where('status', 'antri')
-            ->orderBy('nomor_antrian', 'asc')
-            ->get();
+        $data = Antrian::with('pasien') // Memuat relasi pasien
+        ->whereIn('status', ['antri', 'sedang diperiksa']) // Ambil antrean dengan status "antri" dan "sedang diperiksa"
+        ->orderBy('nomor_antrian', 'asc') // Urutkan berdasarkan nomor antrian
+        ->get();
 
         return view('admin.daftarantrian', compact('data'));
     }
@@ -47,10 +49,8 @@ class AdminController extends Controller
     }
     public function editPatient(Request $request, $id)
     {
-        // Find the patient record by ID
         $patient = Pasien::findOrFail($id);
 
-        // Update the patient details with form input
         $patient->nama_lengkap = $request->input('nama');
         $patient->alamat = $request->input('alamat');
         $patient->umur = $request->input('umur');
@@ -59,10 +59,8 @@ class AdminController extends Controller
         $patient->pekerjaan = $request->input('pekerjaan');
         $patient->tanggal_pemeriksaan = $request->input('tanggal_pemeriksaan');
 
-        // Save the changes to the database
         $patient->save();
 
-        // Redirect back with a success message
         return redirect()->back()->with('success', 'Data pasien berhasil diubah.');
     }
     public function tambahantrian(Request $request)
@@ -71,20 +69,20 @@ class AdminController extends Controller
             'id' => 'required|exists:pasiens,id',
         ]);
 
-        $patient = Pasien::find($request->id);
-        $patient->status = 'antri';
-        $patient->nomor_antrian = Pasien::where('status', 'antri')->max('nomor_antrian') + 1; // Set nomor antrean terakhir + 1
-        $patient->save();
-
-        Pasien::resetQueue();
-
-        try {
-            $patient->save();
-            return response()->json(['success' => true, 'message' => 'Pasien berhasil ditambahkan ke antrian.']);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage()); // Log error
-            return response()->json(['success' => false, 'message' => 'Gagal menambahkan pasien ke antrian.']);
+        $existingQueue = Antrian::where('pasien_id', $request->id)->where('status', 'antri')->first();
+        if ($existingQueue) {
+            return response()->json(['success' => false, 'message' => 'Pasien sudah ada di antrean.']);
         }
+
+        $nomor_antrian = Antrian::where('status', 'antri')->max('nomor_antrian') + 1;
+
+        $antrian = new Antrian();
+        $antrian->pasien_id = $request->id;
+        $antrian->nomor_antrian = $nomor_antrian;
+        $antrian->status = 'antri';
+        $antrian->save();
+
+        return response()->json(['success' => true, 'message' => 'Pasien berhasil ditambahkan ke antrean.']);
     }
 
 
@@ -109,24 +107,33 @@ class AdminController extends Controller
     // Render the partial view and return it as a response for AJAX
     return view('admin.partials.patient_list_rm', compact('data'))->render();
         }
+    protected function resetQueue()
+    {
+        $antrianAktif = Antrian::where('status', 'antri')->orderBy('nomor_antrian', 'asc')->get();
+
+        foreach ($antrianAktif as $index => $antrian) {
+            $antrian->nomor_antrian = $index + 1;
+            $antrian->save();
+        }
+    }
     public function markAsCompleted($id)
         {
-            $patient = Pasien::findOrFail($id);
-            $patient->status = 'selesai';
-            $patient->nomor_antrian = null;
-            $patient->save();
+            $antrian = Antrian::findOrFail($id);
+            $antrian->status = 'selesai';
+            $antrian->nomor_antrian = null;
+            $antrian->save();
 
-            Pasien::resetQueue();
+            // Reset antrean lainnya
+            $this->resetQueue();
 
             return redirect()->back()->with('success', 'Pasien telah selesai.');
         }
         public function markAsInProgress($id)
         {
-            $patient = Pasien::findOrFail($id);
-            $patient->status = 'sedang diperiksa';
-            $patient->save();
+            $antrian = Antrian::findOrFail($id);
+            $antrian->status = 'sedang diperiksa';
+            $antrian->save();
 
-            Pasien::resetQueue();
 
             return redirect()->back()->with('success', 'Pasien sedang diperiksa.');
         }
@@ -134,12 +141,12 @@ class AdminController extends Controller
         public function updateStatus($id)
         {
             // Temukan pasien berdasarkan ID
-            $patient = Pasien::find($id);
+            $antrian = Pasien::find($id);
 
-            if ($patient) {
+            if ($antrian) {
                 // Update status pasien
-                $patient->status = 'sedang diperiksa';
-                $patient->save();
+                $antrian->status = 'sedang diperiksa';
+                $antrian->save();
 
                 return response()->json(['success' => true, 'message' => 'Status pasien diperbarui.']);
             }

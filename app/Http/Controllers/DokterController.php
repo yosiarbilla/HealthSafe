@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\Antrian;
 use App\Models\Pasien;
 use Illuminate\Http\Request;
 
@@ -22,8 +24,8 @@ class DokterController extends Controller
         $data = Pasien::with('examinations')->find($id); // Make sure 'examinations' is the correct relationship name
         return view('dokter.lihatdetail', compact('data'));
     }
-    
-    
+
+
 
     public function searchAntrian(Request $request)
 {
@@ -46,66 +48,66 @@ class DokterController extends Controller
 }
 
 // In DokterController.php
-public function markAsCompleted($id)
-        {
-            $patient = Pasien::findOrFail($id);
-            $patient->status = 'selesai';
-            $patient->save();
-        
-            return redirect()->back()->with('success', 'Pasien telah selesai.');
-        }
-        public function markAsInProgress($id)
-        {
-            $patient = Pasien::findOrFail($id);
+    public function markAsCompleted($id)
+    {
+        $antrian = Antrian::findOrFail($id);
+        $antrian->status = 'selesai';
+        $antrian->save();
+
+        return redirect()->back()->with('success', 'Pasien telah selesai.');
+    }
+    public function markAsInProgress($id)
+    {
+        $antrian = Antrian::findOrFail($id);
 
             // Update the status to 'sedang diperiksa'
-            $patient->status = 'sedang diperiksa';
-            $patient->save();
+        $antrian->status = 'sedang diperiksa';
+        $antrian->save();
 
             // Redirect to Rekam Medis page with patient data
-            return redirect()->route('dokter.rekammedis', ['id' => $id])->with('patient', $patient);
-        }
-        
-        public function updateStatus($id)
-        {
+        return redirect()->route('dokter.rekammedis', ['id' => $id])->with('patient', $antrian);
+    }
+
+    public function updateStatus($id)
+    {
             // Temukan pasien berdasarkan ID
-            $patient = Pasien::find($id);
-        
-            if ($patient) {
-                // Update status pasien
-                $patient->status = 'sedang diperiksa';
-                $patient->save();
-        
-                return response()->json(['success' => true, 'message' => 'Status pasien diperbarui.']);
-            }
-        
-            return response()->json(['success' => false, 'message' => 'Pasien tidak ditemukan.']);
+        $antrian = Antrian::find($id);
+
+        if ($antrian) {
+            // Update status pasien
+            $antrian->status = 'sedang diperiksa';
+            $antrian->save();
+
+            return response()->json(['success' => true, 'message' => 'Status pasien diperbarui.']);
         }
-        public function saveExamination(Request $request)
-{
-    $patient = Pasien::find($request->id); // Sesuaikan dengan ID yang dikirim dari form
-    if ($patient) {
-        $patient->keluhan = $request->keluhan;
-        $patient->diagnosis = $request->diagnosis;
-        $patient->obat = $request->obat;
-        $patient->status = 'selesai'; // Ubah status pasien menjadi 'selesai'
-        $patient->save();
 
-        return response()->json(['success' => true, 'message' => 'Examination data saved successfully']);
+        return response()->json(['success' => false, 'message' => 'Pasien tidak ditemukan.']);
     }
+    public function saveExamination(Request $request)
+    {
+        $patient = Pasien::find($request->id); // Sesuaikan dengan ID yang dikirim dari form
+        if ($patient) {
+            $patient->keluhan = $request->keluhan;
+            $patient->diagnosis = $request->diagnosis;
+            $patient->obat = $request->obat;
+            $patient->status = 'selesai'; // Ubah status pasien menjadi 'selesai'
+            $patient->save();
 
-    return response()->json(['success' => false, 'message' => 'Patient not found']);
-}
-public function deletePatient($id)
-{
-    $patient = Pasien::find($id);
-    if ($patient) {
-        $patient->delete();
-        return response()->json(['success' => true, 'message' => 'Data pasien berhasil dihapus.']);
+            return response()->json(['success' => true, 'message' => 'Examination data saved successfully']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Patient not found']);
     }
+    public function deletePatient($id)
+    {
+        $patient = Pasien::find($id);
+        if ($patient) {
+            $patient->delete();
+            return response()->json(['success' => true, 'message' => 'Data pasien berhasil dihapus.']);
+        }
 
-    return response()->json(['success' => false, 'message' => 'Data pasien tidak ditemukan.']);
-}
+        return response()->json(['success' => false, 'message' => 'Data pasien tidak ditemukan.']);
+    }
 
 
 }
