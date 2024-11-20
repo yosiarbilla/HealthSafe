@@ -318,16 +318,23 @@ $('#examinationForm').on('submit', function(e) {
         data: $(this).serialize(),
         success: function(response) {
             if (response.success) {
-                // Tutup modal setelah simpan berhasil
                 $('#examineModal').modal('hide');
 
                 // Ambil ID pasien dari form
                 const patientId = $('#patientId').val();
 
-                // Hapus pasien dari daftar setelah perubahan status
-                $(`#patientList .patient-list[data-id="${patientId}"]`).remove();
+                // Periksa apakah status adalah 'selesai'
+                if (response.data.status === 'selesai') {
+                    // Hapus pasien dari daftar
+                    $(`#patientList .patient-list[data-id="${patientId}"]`).remove();
+                } else {
+                    // Update badge status menjadi 'sedang diperiksa'
+                    $(`#patientList .patient-list[data-id="${patientId}"] .badge`)
+                        .removeClass('bg-secondary')
+                        .addClass('bg-danger')
+                        .text('Sedang Diperiksa');
+                }
 
-                // Tampilkan pesan sukses
                 swal({
                     title: "Berhasil!",
                     text: response.message,

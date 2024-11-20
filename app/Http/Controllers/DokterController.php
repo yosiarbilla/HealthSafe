@@ -14,7 +14,7 @@ class DokterController extends Controller
     }
     public function daftarantrian(){
         $data = Antrian::with('pasien')
-        ->where('status', ['antri', 'sedang diperiksa'])
+        ->whereIn('status', ['antri', 'sedang diperiksa'])
         ->orderBy('nomor_antrian', 'asc')
         ->get();
 
@@ -77,14 +77,11 @@ class DokterController extends Controller
     public function markAsInProgress($id)
     {
         $antrian = Antrian::findOrFail($id);
-
-            // Update the status to 'sedang diperiksa'
-        $antrian->status = 'sedang diperiksa';
-        $antrian->save();
+        $antrian->update(['status' => 'sedang diperiksa']);
 
             // Redirect to Rekam Medis page with patient data
-        return redirect()->route('dokter.rekammedis', ['id' => $id])->with('patient', $antrian);
-    }
+        return redirect()->back()->with('success', 'Pasien sedang diperiksa.');
+        }
 
     public function updateStatus($id)
     {
