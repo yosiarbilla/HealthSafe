@@ -7,6 +7,7 @@
     <!-- jQuery and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -309,58 +310,52 @@ function openExamineModal(patient) {
     $('#examineModal').modal('show');
 }
 
-$('#examinationForm').on('submit', function(e) {
+$('#examinationForm').on('submit', function (e) {
     e.preventDefault();
 
     $.ajax({
-        url: "{{ route('dokter.saveExamination') }}",
+        url: "{{ route('dokter.saveExamination') }}", // Pastikan route sudah benar
         type: "POST",
         data: $(this).serialize(),
-        success: function(response) {
+        success: function (response) {
             if (response.success) {
-                $('#examineModal').modal('hide');
+                $('#examineModal').modal('hide'); // Tutup modal jika berhasil
 
-                // Ambil ID pasien dari form
-                const patientId = $('#patientId').val();
-
-                // Periksa apakah status adalah 'selesai'
-                if (response.data.status === 'selesai') {
-                    // Hapus pasien dari daftar
-                    $(`#patientList .patient-list[data-id="${patientId}"]`).remove();
-                } else {
-                    // Update badge status menjadi 'sedang diperiksa'
-                    $(`#patientList .patient-list[data-id="${patientId}"] .badge`)
-                        .removeClass('bg-secondary')
-                        .addClass('bg-danger')
-                        .text('Sedang Diperiksa');
-                }
-
-                swal({
+                // SweetAlert Berhasil
+                Swal.fire({
                     title: "Berhasil!",
-                    text: response.message,
+                    text: "Data pemeriksaan pasien telah disimpan.",
                     icon: "success",
-                    button: "OK",
+                    confirmButtonText: "OK",
+                }).then(() => {
+                    // Refresh list antrian setelah sukses
+                    location.reload();
                 });
             } else {
-                swal({
-                    title: "Error",
-                    text: response.message,
+                // SweetAlert Gagal
+                Swal.fire({
+                    title: "Gagal",
+                    text: response.message || "Gagal menyimpan data pemeriksaan pasien.",
                     icon: "error",
-                    button: "OK",
+                    confirmButtonText: "OK",
                 });
             }
         },
-        error: function(xhr) {
+        error: function (xhr) {
             console.error("Error response:", xhr.responseText);
-            swal({
-                title: "Error",
+
+            // SweetAlert Error
+            Swal.fire({
+                title: "Kesalahan!",
                 text: "Terjadi kesalahan saat menyimpan data. Silakan coba lagi.",
                 icon: "error",
-                button: "OK",
+                confirmButtonText: "OK",
             });
-        }
+        },
     });
 });
+
+
 
 
 

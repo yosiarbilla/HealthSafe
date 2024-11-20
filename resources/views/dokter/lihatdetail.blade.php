@@ -152,10 +152,11 @@
             @if($data->rekamMedis->isNotEmpty())
                 @foreach($data->rekamMedis as $record)
                     <div class="record-section">
-                        <div class="record-header" data-bs-toggle="collapse" data-bs-target="#record{{ $record->id }}" aria-expanded="false" aria-controls="record{{ $record->id }}">
-                            <span>TGL {{ \Carbon\Carbon::parse($record->tanggal_pemeriksaan)->format('d/m/Y') }}</span>
-                            <i class="bi bi-chevron-down"></i>
-                        </div>
+                    <div class="record-header" data-bs-toggle="collapse" data-bs-target="#record{{ $record->id }}" aria-expanded="false" aria-controls="record{{ $record->id }}">
+                        <span>TGL {{ \Carbon\Carbon::parse($record->tanggal_pemeriksaan)->format('d/m/Y') }}</span>
+                        <i id="arrowIcon{{ $record->id }}" class="bi bi-chevron-down chevron-icon ms-2"></i>
+                    </div>
+
                         <div id="record{{ $record->id }}" class="collapse">
                             <div class="record-details">
                                 <p><strong>Keluhan:</strong> {{ $record->keluhan }}</p>
@@ -198,6 +199,33 @@
         // Save the PDF
         doc.save(`Detail_Pemeriksaan_${date}.pdf`);
     }
+
+</script>
+<script>
+    // Tambahkan event listener setelah DOM selesai dimuat
+    document.addEventListener("DOMContentLoaded", function() {
+        // Ambil semua elemen dengan class "record-header"
+        const recordHeaders = document.querySelectorAll(".record-header");
+
+        // Tambahkan event listener untuk setiap record-header
+        recordHeaders.forEach(header => {
+            const chevronIcon = header.querySelector(".chevron-icon"); // Ambil chevron-icon di dalam header
+            const targetId = header.getAttribute("data-bs-target"); // Ambil ID target collapse
+            const targetCollapse = document.querySelector(targetId); // Temukan elemen collapse target
+
+            // Event saat collapse ditampilkan
+            targetCollapse.addEventListener("show.bs.collapse", function() {
+                chevronIcon.classList.remove("bi-chevron-down");
+                chevronIcon.classList.add("bi-chevron-up");
+            });
+
+            // Event saat collapse disembunyikan
+            targetCollapse.addEventListener("hide.bs.collapse", function() {
+                chevronIcon.classList.remove("bi-chevron-up");
+                chevronIcon.classList.add("bi-chevron-down");
+            });
+        });
+    });
 </script>
 
 </body>
