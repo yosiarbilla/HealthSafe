@@ -7,7 +7,7 @@
     <!-- jQuery and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -131,36 +131,37 @@
             </div>
             <div class="total-count">Total Antrian: {{ $data->count() }}</div>
             <div id="patientList">
-                @foreach($data as $index => $patient)
-                <div class="patient-list d-flex justify-content-between align-items-center" data-id="{{ $patient->id }}">
+                @foreach($data as $index => $no)
+                <div class="patient-list d-flex justify-content-between align-items-center" data-id="{{ $no->id }}">
                     <div class="patient-info d-flex align-items-center">
-                        <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{$patient->nama_lengkap}}</span>
-                        <span class="ms-3 badge 
-                            @if($patient->status === 'sedang diperiksa') bg-danger 
-                            @elseif($patient->status === 'selesai') bg-success 
-                            @else bg-secondary 
+                        <span>{{ $loop->iteration }}.&nbsp;&nbsp;{{ optional($no->pasien)->nama_lengkap }}</span>
+                        <span class="ms-3 badge
+                            @if($no->status === 'sedang diperiksa') bg-danger
+                            @elseif($no->status === 'selesai') bg-success
+                            @else bg-secondary
                             @endif">
-                            {{ ucfirst($patient->status) }}
+                            {{ ucfirst($no->status) }}
                         </span>
                     </div>
                     <div class="button-group ms-auto">
                         <button class="btn btn-primary btn-sm" onclick="openExamineModal({
-                            id: {{ $patient->id }},
-                            tanggal_pemeriksaan: '{{ \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d/m/Y') }}',
-                            nama_lengkap: '{{ $patient->nama_lengkap }}',
-                            alamat: '{{ $patient->alamat }}',
-                            umur: '{{ $patient->umur }}',
-                            gender: '{{ $patient->gender }}',
-                            pendidikan: '{{ $patient->pendidikan }}',
-                            pekerjaan: '{{ $patient->pekerjaan }}'
+                            id: {{ $no->id }},
+                            tanggal_pemeriksaan: '{{ \Carbon\Carbon::parse($no->tanggal_pemeriksaan)->format('d/m/Y') }}',
+                            nama_lengkap: '{{ $no->nama_lengkap }}',
+                            alamat: '{{ $no->alamat }}',
+                            umur: '{{ $no->umur }}',
+                            gender: '{{ $no->gender }}',
+                            pendidikan: '{{ $no->pendidikan }}',
+                            pekerjaan: '{{ $no->pekerjaan }}'
                         })">Periksa</button>
                     </div>
                 </div>
-
                 @endforeach
             </div>
+
+            </div>
         </div>
-    </div>  
+    </div>
 </div>
 
 <div class="modal fade" id="examineModal" tabindex="-1" aria-labelledby="examineModalLabel" aria-hidden="true">
@@ -322,10 +323,6 @@ $('#examinationForm').on('submit', function(e) {
 
                 // Ambil ID pasien dari form
                 const patientId = $('#patientId').val();
-
-                // Ubah status di daftar antrian menjadi 'selesai'
-                $(`#patientList .patient-list[data-id="${patientId}"] .badge`)
-                    .removeClass('bg-secondary').addClass('bg-success').text('Selesai');
 
                 // Hapus pasien dari daftar setelah perubahan status
                 $(`#patientList .patient-list[data-id="${patientId}"]`).remove();

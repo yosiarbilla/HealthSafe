@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Antrian;
 use App\Models\Pasien;
+use App\Models\RekamMedis;
 use Illuminate\Http\Request;
 
 class DokterController extends Controller
@@ -12,7 +13,11 @@ class DokterController extends Controller
         return view('dokter.dashboard');
     }
     public function daftarantrian(){
-        $data=pasien::all();
+        $data = Antrian::with('pasien')
+        ->where('status', ['antri', 'sedang diperiksa'])
+        ->orderBy('nomor_antrian', 'asc')
+        ->get();
+
         return view('dokter.daftarantrian', compact('data'));
     }
     public function rekammedis(){
@@ -21,7 +26,7 @@ class DokterController extends Controller
     }
 
     public function lihatdetail($id) {
-        $data = Pasien::with('examinations')->find($id); // Make sure 'examinations' is the correct relationship name
+        $data = Pasien::with('rekamMedis')->findOrFail($id);
         return view('dokter.lihatdetail', compact('data'));
     }
 
@@ -48,14 +53,27 @@ class DokterController extends Controller
 }
 
 // In DokterController.php
+    protected function resetQueue()
+    {
+        $antrianAktif = Antrian::where('status', 'antri')->orderBy('nomor_antrian', 'asc')->get();
+
+        foreach ($antrianAktif as $index => $antrian) {
+            $antrian->nomor_antrian = $index + 1;
+            $antrian->save();
+        }
+    }
     public function markAsCompleted($id)
     {
         $antrian = Antrian::findOrFail($id);
         $antrian->status = 'selesai';
+        $antrian->nomor_antrian = null;
         $antrian->save();
+
+        $this->resetQueue();
 
         return redirect()->back()->with('success', 'Pasien telah selesai.');
     }
+
     public function markAsInProgress($id)
     {
         $antrian = Antrian::findOrFail($id);
@@ -85,19 +103,34 @@ class DokterController extends Controller
     }
     public function saveExamination(Request $request)
     {
-        $patient = Pasien::find($request->id); // Sesuaikan dengan ID yang dikirim dari form
-        if ($patient) {
-            $patient->keluhan = $request->keluhan;
-            $patient->diagnosis = $request->diagnosis;
-            $patient->obat = $request->obat;
-            $patient->status = 'selesai'; // Ubah status pasien menjadi 'selesai'
-            $patient->save();
+        // Validasi input
+        $request->validate([
+            'id' => 'required|exists:antrian,id',
+            'keluhan' => 'required|string',
+            'diagnosis' => 'required|string',
+            'obat' => 'required|string',
+        ]);
 
-            return response()->json(['success' => true, 'message' => 'Examination data saved successfully']);
-        }
+        $antrian = Antrian::findOrFail($request->id);
 
-        return response()->json(['success' => false, 'message' => 'Patient not found']);
+        RekamMedis::create([
+            'pasien_id' => $antrian->pasien_id,
+            'keluhan' => $request->input('keluhan'),
+            'diagnosis' => $request->input('diagnosis'),
+            'obat' => $request->input('obat'),
+            'tanggal_pemeriksaan' => now(),
+        ]);
+
+        $antrian->update(['status' => 'selesai']);
+        $antrian->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data pemeriksaan berhasil disimpan.',
+        ]);
     }
+
+
     public function deletePatient($id)
     {
         $patient = Pasien::find($id);

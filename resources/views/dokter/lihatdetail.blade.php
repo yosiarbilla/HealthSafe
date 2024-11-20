@@ -148,27 +148,28 @@
                 <p><strong>Alamat:</strong> {{ $data->alamat }}</p>
             </div>
 
-            <!-- Dynamic Examination Records -->
-@if(!empty($data->examinations))
-    @foreach($data->examinations as $examination)
-        <div class="record-section">
-            <div class="record-header" data-bs-toggle="collapse" data-bs-target="#record{{ $examination->id }}" aria-expanded="false" aria-controls="record{{ $examination->id }}">
-                <span>TGL {{ \Carbon\Carbon::parse($examination->date)->format('d/m/Y') }}</span>
-                <i class="bi bi-chevron-down"></i>
-            </div>
-            <div id="record{{ $examination->id }}" class="collapse">
-                <div class="record-details">
-                    <p><strong>Keluhan:</strong> {{ $examination->keluhan }}</p>
-                    <p><strong>Diagnosis:</strong> {{ $examination->diagnosis }}</p>
-                    <p><strong>Obat:</strong> {{ $examination->obat }}</p>
-                    <button class="download-button" onclick="downloadPDF('{{ $examination->date }}', '{{ $examination->keluhan }}', '{{ $examination->diagnosis }}', '{{ $examination->obat }}')">Download PDF</button>
-                </div>
-            </div>
-        </div>
-    @endforeach
-@else
-    <p>No examination records available for this patient.</p>
-@endif
+            <!-- Rekam Medis -->
+            @if($data->rekamMedis->isNotEmpty())
+                @foreach($data->rekamMedis as $record)
+                    <div class="record-section">
+                        <div class="record-header" data-bs-toggle="collapse" data-bs-target="#record{{ $record->id }}" aria-expanded="false" aria-controls="record{{ $record->id }}">
+                            <span>TGL {{ \Carbon\Carbon::parse($record->tanggal_pemeriksaan)->format('d/m/Y') }}</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div id="record{{ $record->id }}" class="collapse">
+                            <div class="record-details">
+                                <p><strong>Keluhan:</strong> {{ $record->keluhan }}</p>
+                                <p><strong>Diagnosis:</strong> {{ $record->diagnosis }}</p>
+                                <p><strong>Obat:</strong> {{ $record->obat }}</p>
+                                <button class="download-button" onclick="downloadPDF('{{ $record->tanggal_pemeriksaan }}', '{{ $record->keluhan }}', '{{ $record->diagnosis }}', '{{ $record->obat }}')">Download PDF</button>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @else
+                <p>No examination records available for this patient.</p>
+            @endif
+
         </div>
     </div>
 </div>
