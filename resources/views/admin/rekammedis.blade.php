@@ -199,23 +199,24 @@
                     <!-- Examination Date Header -->
                     <!-- List of Patients for this Date -->
                     @foreach($patients as $patient)
-                        <div class="patient-list d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapsePatient{{ $patient->id }}" aria-expanded="false" aria-controls="collapsePatient{{ $patient->id }}">
-                            <span class="d-flex align-items-center">
-                                {{ $patient->nama_lengkap }}
-                                <i class="dropdown-icon bi bi-chevron-down ms-2"></i>
-                            </span>
-                        </div>
-                        <div id="collapsePatient{{ $patient->id }}" class="collapse">
-                            <div class="p-3">
-                                <p><strong>Tanggal Pemeriksaan:</strong> {{ \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d/m/Y') }}</p>
-                                <p><strong>Nama:</strong> {{ $patient->nama_lengkap }}</p>
-                                <p><strong>Alamat:</strong> {{ $patient->alamat }}</p>
-                                <p><strong>Umur:</strong> {{ $patient->umur }}</p>
-                                <p><strong>Gender:</strong> {{ $patient->gender }}</p>
-                                <p><strong>Pendidikan:</strong> {{ $patient->pendidikan }}</p>
-                                <p><strong>Pekerjaan:</strong> {{ $patient->pekerjaan }}</p>
-                            </div>
-                        </div>
+                    <div class="patient-list d-flex justify-content-between align-items-center" data-id="{{ $patient->id }}">
+    <span class="d-flex align-items-center">
+        {{ $patient->nama_lengkap }}
+        <i class="dropdown-icon bi bi-chevron-down ms-2" style="cursor: pointer;"></i>
+    </span>
+</div>
+<div id="collapsePatient{{ $patient->id }}" class="collapse">
+    <div class="p-3">
+        <p><strong>Tanggal Pemeriksaan:</strong> {{ \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d/m/Y') }}</p>
+        <p><strong>Nama:</strong> {{ $patient->nama_lengkap }}</p>
+        <p><strong>Alamat:</strong> {{ $patient->alamat }}</p>
+        <p><strong>Umur:</strong> {{ $patient->umur }}</p>
+        <p><strong>Gender:</strong> {{ $patient->gender }}</p>
+        <p><strong>Pendidikan:</strong> {{ $patient->pendidikan }}</p>
+        <p><strong>Pekerjaan:</strong> {{ $patient->pekerjaan }}</p>
+    </div>
+</div>
+
                     @endforeach
                 @endforeach
             </div>
@@ -302,20 +303,35 @@
     }
 
     function reinitializeCollapse() {
-        $('.collapse').off('show.bs.collapse hide.bs.collapse');
+    // Pastikan event listener dihapus sebelum ditambahkan lagi
+    $('.dropdown-icon').off('click');
 
-        $('.collapse').on('show.bs.collapse', function () {
-            $(this).prev().find('.dropdown-icon').removeClass('bi-chevron-down').addClass('bi-chevron-up');
-        });
-
-        $('.collapse').on('hide.bs.collapse', function () {
-            $(this).prev().find('.dropdown-icon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
-        });
-    }
-
-    $(document).ready(function () {
-        reinitializeCollapse();
+    // Tambahkan event listener untuk dropdown toggle
+    $('.dropdown-icon').on('click', function () {
+        const collapseElement = $(this).closest('.patient-list').next('.collapse');
+        
+        // Periksa apakah dropdown sedang terbuka
+        if (collapseElement.hasClass('show')) {
+            collapseElement.collapse('hide'); // Tutup dropdown
+        } else {
+            collapseElement.collapse('show'); // Buka dropdown
+        }
     });
+
+    // Perbarui ikon saat dropdown dibuka/tutup
+    $('.collapse').on('show.bs.collapse', function () {
+        $(this).prev().find('.dropdown-icon').removeClass('bi-chevron-down').addClass('bi-chevron-up');
+    });
+
+    $('.collapse').on('hide.bs.collapse', function () {
+        $(this).prev().find('.dropdown-icon').removeClass('bi-chevron-up').addClass('bi-chevron-down');
+    });
+}
+
+$(document).ready(function () {
+    reinitializeCollapse();
+});
+
 </script>
 
 <script>

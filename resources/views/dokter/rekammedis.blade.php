@@ -109,6 +109,20 @@
             justify-content: space-between; /* Align button to the far right */
             align-items: center;
         }
+    .pagination .page-item.active .page-link {
+        background-color: #0085AA;
+        border-color: #0085AA;
+        color: white;
+    }
+
+    .pagination .page-link {
+        color: #0085AA;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #e0f7fa;
+    }
+
 
         .total-count {
             font-weight: bold;
@@ -174,7 +188,8 @@
             <div id="patientList">
                 @foreach($data as $index => $patient)
                     <div class="patient-list" data-id="{{ $patient->id }}">
-                        <span>{{ $loop->iteration }}.&nbsp;&nbsp; {{ $patient->nama_lengkap }}</span>
+                       <span>{{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}. {{ $patient->nama_lengkap }}</span>
+
                         <div>
                             <a href="{{ route('dokter.lihatdetail', ['id' => $patient->id]) }}" class="btn-view-details">Lihat Detail</a>
                             <button onclick="deletePatient({{ $patient->id }})" class="btn-delete">Hapus</button>
@@ -182,7 +197,9 @@
                     </div>
                 @endforeach
             </div>
-
+            <div class="d-flex justify-content-center mt-3">
+                {{ $data->links('pagination::bootstrap-5') }}
+            </div>
         </div>
     </div>
 </div>

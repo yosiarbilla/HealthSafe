@@ -267,19 +267,6 @@
                         </form>
                     </div>
                 </div>
-
-                <!-- Patient Details Collapse -->
-                <div id="collapsePatient{{ $index }}" class="collapse">
-                    <div class="p-3">
-                        <p><strong>Tanggal Pemeriksaan:</strong> {{ \Carbon\Carbon::parse($queue->pasien->tanggal_pemeriksaan)->format('d/m/Y') }}</p>
-                        <p><strong>Nama:</strong> {{ $queue->pasien->nama_lengkap }}</p>
-                        <p><strong>Alamat:</strong> {{ $queue->pasien->alamat }}</p>
-                        <p><strong>Umur:</strong> {{ $queue->pasien->umur }}</p>
-                        <p><strong>Gender:</strong> {{ $queue->pasien->gender }}</p>
-                        <p><strong>Pendidikan:</strong> {{ $queue->pasien->pendidikan }}</p>
-                        <p><strong>Pekerjaan:</strong> {{ $queue->pasien->pekerjaan }}</p>
-                    </div>
-                </div>
                 @endforeach
 
             </div>
@@ -288,52 +275,7 @@
 </div>
 
 
-<!-- Add Patient Modal -->
-<div class="modal fade" id="addPatientModal" tabindex="-1" aria-labelledby="addPatientModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body">
-            <form action="{{ url('/admin/tambahantrian') }}" method="POST">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="patientName" class="form-label">Nama Pasien</label>
-                        <input type="text" class="form-control"  name="nama" placeholder="Masukkan nama pasien" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientAddress" class="form-label">Alamat</label>
-                        <input type="text" class="form-control" name="alamat" placeholder="Masukkan alamat pasien" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientAge" class="form-label">Umur</label>
-                        <input type="number" class="form-control" name="umur" placeholder="Masukkan usia pasien" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientGender" class="form-label">Jenis Kelamin</label>
-                        <select class="form-select" name="gender" required>
-                            <option selected disabled>Pilih jenis kelamin</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientEducation" class="form-label">Pendidikan</label>
-                        <input type="text" class="form-control" name="pendidikan" placeholder="Masukkan pendidikan pasien" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientJob" class="form-label">Pekerjaan</label>
-                        <input type="text" class="form-control" name="pekerjaan" placeholder="Masukkan pekerjaan pasien" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="patientDate" class="form-label">Tanggal Pemeriksaan</label>
-                        <input type="date" class="form-control" name="tanggal" placeholder="Pilih tanggal" required>
-                    </div>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+
 <script>
 
 function searchPatient() {
@@ -404,20 +346,24 @@ function selectPatient(name, id) {
 
 
 function initializeDynamicListeners() {
-    // Collapse toggle event listener for chevron icon
-    $('.patient-info').off('click').on('click', function() {
-        let collapseId = $(this).attr('data-bs-target');
-        let arrowIcon = $(this).find('.chevron-icon');
+    // Toggle dropdown functionality
+    $('.patient-info').off('click').on('click', function () {
+        const collapseId = $(this).attr('data-bs-target');
+        const chevronIcon = $(this).find('.chevron-icon');
 
-        // Toggle icon based on collapse status
-        $(collapseId).on('shown.bs.collapse', function() {
-            arrowIcon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
+        // Toggle collapse
+        $(collapseId).collapse('toggle');
+
+        // Synchronize chevron icon
+        $(collapseId).on('shown.bs.collapse', function () {
+            chevronIcon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
         });
 
-        $(collapseId).on('hidden.bs.collapse', function() {
-            arrowIcon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        $(collapseId).on('hidden.bs.collapse', function () {
+            chevronIcon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
         });
     });
+
 
     // Delete confirmation with SweetAlert
     $('.btn-danger').off('click').on('click', function(event) {

@@ -21,7 +21,7 @@ class DokterController extends Controller
         return view('dokter.daftarantrian', compact('data'));
     }
     public function rekammedis(){
-        $data = Pasien::all();
+        $data = Pasien::paginate(10);
         return view('dokter.rekammedis', compact('data'));
     }
 

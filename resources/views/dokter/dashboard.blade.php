@@ -13,40 +13,7 @@
         }
 
         /* Sidebar styling */
-        .sidebar {
-            background: linear-gradient(196.32deg, #97EEC8 0.87%, #0085AA 100%);
-            color: white;
-            padding: 2rem 1rem;
-            height: 100vh;
-            width: 20vw; /* Narrower sidebar */
-            border-radius: 0 15px 15px 0; /* Adjusted for a smaller rounded edge */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .logo {
-            width: 150px;
-            margin-bottom: 1.5rem;
-        }
-
-        .sidebar h3 {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #0085AA;
-            margin-bottom: 2rem;
-            text-align: center; /* Center text */
-        }
-
-        .sidebar .btn {
-            background-color: #e0f7fa;
-            color: #0085AA;
-            border: none;
-            border-radius: 10px;
-            width: 100%;
-            margin-bottom: 1rem;
-            font-weight: bold;
-        }
+        
 
         /* Main content styling */
         .main-content {
