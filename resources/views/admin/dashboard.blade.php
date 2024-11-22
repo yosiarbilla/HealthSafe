@@ -18,8 +18,8 @@
             color: white;
             padding: 2rem 1rem;
             height: 100vh;
-            width: 20vw; /* Narrower sidebar */
-            border-radius: 0 15px 15px 0; /* Adjusted for a smaller rounded edge */
+            width: 20vw;
+            border-radius: 0 15px 15px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -64,16 +64,39 @@
         /* Card styling */
         .card {
             border-radius: 20px;
-            background-color: #e0f7fa;
+            background-color: #e0f7fa !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             padding: 1.5rem;
             text-align: center;
             color: #0085AA;
             font-weight: bold;
         }
+        .card p{
+            text-align: start;
+            color: #0085AA;
+            font-weight: bold;
+        }
+        .card a{
+            text-align: start;
+            color: #0085AA;
+            font-weight: bold;
+            bottom: 10px;
+            right: 10px;
+            text-transform: none;
+            text-decoration: none;
+            font-size: 1rem
+        }
+        .card h5{
+            text-align: start;
+            color: #0085AA;
+            font-weight: bold;
+            font-size: 3rem
+        }
 
         /* Chart styling */
         .chart-card {
+            height: 350px;
+            overflow-y: auto;
             border-radius: 20px;
             background-color: #d6f5f7;
             padding: 1.5rem;
@@ -92,6 +115,26 @@
             position: relative;
             text-align: center;
             font-size: 0.9rem;
+            height: calc(10px + 10%);
+            min-height: 50px;
+        }
+        .chart-card h4 {
+            text-align: start;
+            color: #0085AA;
+            font-weight: bold;
+            font-size: 2rem;
+            text-transform: none;
+            text-decoration: none;
+        }
+        .chart-card h4 a {
+            color: #0085AA !important;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .chart-card h4 a:hover {
+            color: #005F73 !important;
+            text-decoration: underline;
         }
 
         .chart-bar span {
@@ -100,6 +143,14 @@
             left: 50%;
             transform: translateX(-50%);
         }
+        .d-flex.align-items-end {
+            align-items: flex-end;
+            height: 250px;
+            position: relative;
+            border-radius: 10px;
+            padding: 10px 0;
+        }
+
     </style>
 </head>
 <body>
@@ -116,33 +167,41 @@
 
             <!-- Chart card -->
             <div class="chart-card">
-                <h4>Total Pasien Mingguan</h4>
+                <h4>
+                    <a href="{{ route('admin.patients.weekly') }}" class="text-decoration-none text-primary">
+                        Total Pasien Mingguan
+                    </a>
+                </h4>
                 <div class="d-flex justify-content-between align-items-end">
-                    <div class="chart-bar" style="height: 80px;"><span>8</span></div>
-                    <div class="chart-bar" style="height: 120px;"><span>12</span></div>
-                    <div class="chart-bar" style="height: 70px;"><span>7</span></div>
-                    <div class="chart-bar" style="height: 50px;"><span>5</span></div>
-                    <div class="chart-bar" style="height: 140px;"><span>14</span></div>
-                    <div class="chart-bar" style="height: 60px;"><span>6</span></div>
-                    <div class="chart-bar" style="height: 150px;"><span>15</span></div>
+                    @foreach($pasienMingguan as $data)
+                        <div class="chart-bar" style="height: {{ $data->total * 10 }}px;">
+                            <span>{{ $data->total }}</span>
+                            <p>{{ \Carbon\Carbon::parse($data->date)->format('d M') }}</p>
+                        </div>
+                    @endforeach
                 </div>
             </div>
+
 
             <!-- Cards for additional information -->
             <div class="row">
                 <div class="col-md-6">
                     <div class="card">
                         <h5>Total Pasien</h5>
-                        <p>20 Maret 2045</p>
+                        <p style="font-size: 2rem">{{ $todayDate }}</p>
+                        <p style="font-size: 5rem">{{ $totalPasienHariIni }}</p>
+                        <a href="{{ route('admin.patients.today') }}" class="position-absolute" >Detail >></a>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="card">
                         <h5>Jadwal Praktek</h5>
-                        <p>20 Maret 2045</p>
+                        <p style="font-size: 2rem">{{ $todayDate }}</p>
+                        <p style="font-size: 5rem"> 08:00 - 16:00</p>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

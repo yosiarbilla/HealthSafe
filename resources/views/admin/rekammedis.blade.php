@@ -165,64 +165,48 @@
 </head>
 <body>
 
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        @include('admin.sidebar')
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            @include('admin.sidebar')
 
-        <!-- Main content -->
-        <div class="col main-content">
-            <!-- Back arrow and Header -->
-            <div class="d-flex align-items-center mb-3">
-                <a href="{{url('/admin/dashboard')}}" class="d-inline-flex align-items-center mb-3 text-decoration-none">
-                    <i class="back-arrow bi bi-arrow-left"></i>
-                </a>
-                <h1 class="dashboard-header ms-2">Rekam Medis</h1>
-            </div>
+            <!-- Main content -->
+            <div class="col main-content">
+                <!-- Back arrow and Header -->
+                <div class="d-flex align-items-center mb-3">
+                    <a href="{{url('/admin/dashboard')}}" class="d-inline-flex align-items-center mb-3 text-decoration-none">
+                        <i class="back-arrow bi bi-arrow-left"></i>
+                    </a>
+                    <h1 class="dashboard-header ms-2">Rekam Medis</h1>
+                </div>
 
-            <!-- Search bar -->
-            <div class="search-bar">
-                <i class="bi bi-search"></i>
-                <input type="text" name="search" id="searchInput" placeholder="Masukkan Nama Pasien" onkeyup="searchPatient2()">
-            </div>
+                <!-- Search bar -->
+                <div class="search-bar">
+                    <i class="bi bi-search"></i>
+                    <input type="text" name="search" id="searchInput" placeholder="Masukkan Nama Pasien" onkeyup="searchPatient2()">
+                </div>
 
-            <!-- Add Patient Button with "+" icon -->
-            <button class="add-patient-btn" data-bs-toggle="modal" data-bs-target="#addPatientModal">
-                <i class="bi bi-plus-lg"></i> Tambah Pasien
-            </button>
+                <!-- Add Patient Button (Hanya untuk Admin) -->
+                <button class="add-patient-btn" data-bs-toggle="modal" data-bs-target="#addPatientModal">
+                    <i class="bi bi-plus-lg"></i> Tambah Pasien
+                </button>
 
+                <!-- Patient List -->
+                <div id="patientList">
+                    @foreach($data as $date => $patients)
 
-
-            <!-- Patient List -->
-            <div id="patientList">
-                @foreach($data as $date => $patients)
-                    <!-- Examination Date Header -->
-                    <!-- List of Patients for this Date -->
-                    @foreach($patients as $patient)
-                    <div class="patient-list d-flex justify-content-between align-items-center" data-id="{{ $patient->id }}">
-    <span class="d-flex align-items-center">
-        {{ $patient->nama_lengkap }}
-        <i class="dropdown-icon bi bi-chevron-down ms-2" style="cursor: pointer;"></i>
-    </span>
-</div>
-<div id="collapsePatient{{ $patient->id }}" class="collapse">
-    <div class="p-3">
-        <p><strong>Tanggal Pemeriksaan:</strong> {{ \Carbon\Carbon::parse($patient->tanggal_pemeriksaan)->format('d/m/Y') }}</p>
-        <p><strong>Nama:</strong> {{ $patient->nama_lengkap }}</p>
-        <p><strong>Alamat:</strong> {{ $patient->alamat }}</p>
-        <p><strong>Umur:</strong> {{ $patient->umur }}</p>
-        <p><strong>Gender:</strong> {{ $patient->gender }}</p>
-        <p><strong>Pendidikan:</strong> {{ $patient->pendidikan }}</p>
-        <p><strong>Pekerjaan:</strong> {{ $patient->pekerjaan }}</p>
-    </div>
-</div>
-
+                        @foreach($patients as $patient)
+                            <div class="patient-list d-flex justify-content-between align-items-center" data-id="{{ $patient->id }}">
+                                <span>{{ $patient->nama_lengkap }}</span>
+                                <a href="{{ route('admin.detail.pasien', ['id' => $patient->id]) }}" class="btn btn-primary btn-sm">Lihat Detail</a>
+                            </div>
+                        @endforeach
                     @endforeach
-                @endforeach
+                </div>
             </div>
         </div>
     </div>
-</div>
+
 
 <!-- Add Patient Modal -->
 <div class="modal fade" id="addPatientModal" tabindex="-1" aria-labelledby="addPatientModalLabel" aria-hidden="true">
@@ -264,7 +248,7 @@
                         <input type="text" class="form-control" name="pekerjaan" placeholder="Masukkan pekerjaan pasien" required>
                     </div>
                     <div class="mb-3">
-                        <label for="patientDate" class="form-label">Tanggal Pemeriksaan</label>
+                        <label for="patientDate" class="form-label">Tanggal Lahir</label>
                         <input type="date" class="form-control" name="tanggal" placeholder="Pilih tanggal" required>
                     </div>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -288,28 +272,28 @@
 </div>
 
 <script>
-    function searchPatient2() {
-        var searchQuery = $('#searchInput').val();
+function searchPatient2() {
+    var searchQuery = $('#searchInput').val();
 
-        $.ajax({
-            url: "{{ route('admin.search.antrian2') }}",
-            type: "GET",
-            data: { search: searchQuery },
-            success: function(data) {
-                $('#patientList').html(data);
-                reinitializeCollapse();
-            }
-        });
-    }
+    $.ajax({
+        url: "{{ route('admin.search.antrian2') }}",
+        type: "GET",
+        data: { search: searchQuery },
+        success: function(data) {
+            $('#patientList').html(data);
+            reinitializeCollapse();
+        }
+    });
+}
 
-    function reinitializeCollapse() {
+function reinitializeCollapse() {
     // Pastikan event listener dihapus sebelum ditambahkan lagi
     $('.dropdown-icon').off('click');
 
     // Tambahkan event listener untuk dropdown toggle
     $('.dropdown-icon').on('click', function () {
         const collapseElement = $(this).closest('.patient-list').next('.collapse');
-        
+
         // Periksa apakah dropdown sedang terbuka
         if (collapseElement.hasClass('show')) {
             collapseElement.collapse('hide'); // Tutup dropdown

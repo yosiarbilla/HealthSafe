@@ -267,6 +267,67 @@
                         </form>
                     </div>
                 </div>
+                <div id="collapsePatient{{ $index }}" class="collapse">
+                    <div class="p-3 bg-light rounded">
+                        <p><strong>Nama:</strong> {{ optional($queue->pasien)->nama_lengkap }}</p>
+                        <p><strong>Alamat:</strong> {{ optional($queue->pasien)->alamat }}</p>
+                        <p><strong>Umur:</strong> {{ optional($queue->pasien)->umur }}</p>
+                        <p><strong>Gender:</strong> {{ optional($queue->pasien)->gender }}</p>
+                        <p><strong>Pendidikan:</strong> {{ optional($queue->pasien)->pendidikan }}</p>
+                        <p><strong>Pekerjaan:</strong> {{ optional($queue->pasien)->pekerjaan }}</p>
+                    </div>
+                </div>
+                <div class="modal fade" id="editPatientModal{{ $index }}" tabindex="-1" aria-labelledby="editPatientModalLabel{{ $index }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editPatientModalLabel{{ $index }}">Edit Pasien</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Form Edit Pasien -->
+                                <form action="{{ route('admin.edit.antrian', $queue->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="mb-3">
+                                        <label for="editName" class="form-label">Nama Pasien</label>
+                                        <input type="text" class="form-control" name="nama" value="{{ optional($queue->pasien)->nama_lengkap }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editAddress" class="form-label">Alamat</label>
+                                        <input type="text" class="form-control" name="alamat" value="{{ optional($queue->pasien)->alamat }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editAge" class="form-label">Umur</label>
+                                        <input type="number" class="form-control" name="umur" value="{{ optional($queue->pasien)->umur }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editGender" class="form-label">Jenis Kelamin</label>
+                                        <select class="form-select" name="gender" required>
+                                            <option value="Laki-laki" {{ optional($queue->pasien)->gender == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                                            <option value="Perempuan" {{ optional($queue->pasien)->gender == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editEducation" class="form-label">Pendidikan</label>
+                                        <input type="text" class="form-control" name="pendidikan" value="{{ optional($queue->pasien)->pendidikan }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editJob" class="form-label">Pekerjaan</label>
+                                        <input type="text" class="form-control" name="pekerjaan" value="{{ optional($queue->pasien)->pekerjaan }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editDate" class="form-label">Tanggal Pemeriksaan</label>
+                                        <input type="date" class="form-control" name="tanggal_pemeriksaan" value="{{ optional($queue->pasien)->tanggal_pemeriksaan }}" required>
+                                    </div>
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 @endforeach
 
             </div>
@@ -277,7 +338,37 @@
 
 
 <script>
+$(document).on('click', '.patient-info', function () {
+        const collapseId = $(this).attr('data-bs-target');
+        const chevronIcon = $(this).find('.chevron-icon');
+        const isExpanded = $(this).attr('aria-expanded') === 'true';
 
+        // Toggle collapse manually
+        if (isExpanded) {
+            $(collapseId).collapse('hide');
+            $(this).attr('aria-expanded', 'false');
+            chevronIcon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        } else {
+            $(collapseId).collapse('show');
+            $(this).attr('aria-expanded', 'true');
+            chevronIcon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
+        }
+    });
+
+    // Synchronize chevron icon on collapse events
+    $('.collapse').on('shown.bs.collapse', function () {
+        const chevronIcon = $(`[data-bs-target="#${this.id}"]`).find('.chevron-icon');
+        const toggleButton = $(`[data-bs-target="#${this.id}"]`);
+        chevronIcon.removeClass('bi-chevron-down').addClass('bi-chevron-up');
+        toggleButton.attr('aria-expanded', 'true');
+    });
+
+    $('.collapse').on('hidden.bs.collapse', function () {
+        const chevronIcon = $(`[data-bs-target="#${this.id}"]`).find('.chevron-icon');
+        const toggleButton = $(`[data-bs-target="#${this.id}"]`);
+        chevronIcon.removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        toggleButton.attr('aria-expanded', 'false');
+    });
 function searchPatient() {
     let searchQuery = $('#searchInput').val();
 
@@ -347,7 +438,7 @@ function selectPatient(name, id) {
 
 function initializeDynamicListeners() {
     // Toggle dropdown functionality
-    $('.patient-info').off('click').on('click', function () {
+    $(document).on('click', '.patient-info', function () {
         const collapseId = $(this).attr('data-bs-target');
         const chevronIcon = $(this).find('.chevron-icon');
 

@@ -31,15 +31,21 @@ route::middleware(['auth', Admin::class])->group(function(){
     Route::get('/admin/search-antrian2', [AdminController::class, 'searchAntrian2'])->name('admin.search.antrian2');
     Route::get('/admin/rekam-medis', [AdminController::class, 'rekammedis'])->name('admin.rekammedis');
     Route::delete('/admin/daftarantrian/{id}', [AdminController::class, 'deletePatient'])->name('admin.delete.antrian');
-    Route::put('/admin/daftarantrian/{id}', [AdminController::class, 'editPatient'])->name('admin.edit.antrian');
+    Route::put('/admin/daftarantrian/{id}/edit', [AdminController::class, 'editPatient'])->name('admin.edit.antrian');
     Route::put('/admin/mark-as-completed/{id}', [AdminController::class, 'markAsCompleted'])->name('admin.markAsCompleted');
     Route::put('/admin/mark-as-in-progress/{id}', [AdminController::class, 'markAsInProgress'])->name('admin.markAsInProgress');
     Route::post('/admin/patient/{id}/update-status', [AdminController::class, 'updateStatus'])->name('admin.patient.updateStatus');
     Route::get('/admin/search/suggestions', [AdminController::class, 'searchSuggestions'])->name('admin.search.suggestions');
+    Route::get('/admin/patients/today', [AdminController::class, 'patientsToday'])->name('admin.patients.today');
+    Route::get('/admin/patients/weekly', [AdminController::class, 'patientsWeekly'])->name('admin.patients.weekly');
+    Route::get('/admin/detail-pasien/{id}', [AdminController::class, 'detailPasien'])->name('admin.detail.pasien');
+
 
 });
 route::middleware(['auth', Dokter::class])->group(function(){
     route::get('/dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
+    Route::get('/dokter/patients/today', [DokterController::class, 'patientsToday'])->name('dokter.patients.today');
+    Route::get('/dokter/patients/weekly', [DokterController::class, 'patientsWeekly'])->name('dokter.patients.weekly');
     route::get('/dokter/daftarantrian', [DokterController::class, 'daftarantrian'])->name('dokter.daftarantrian');
     Route::get('/dokter/search-antrian', [DokterController::class, 'searchAntrian'])->name('dokter.search.antrian');
     Route::get('/dokter/rekam-medis', [DokterController::class, 'rekammedis'])->name('dokter.rekammedis');

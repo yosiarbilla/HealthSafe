@@ -130,12 +130,12 @@
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar with updated styling to match Rekam Medis -->
-        @include('dokter.sidebar')
+        @include('admin.sidebar')
 
         <!-- Main content -->
         <div class="col main-content">
             <div class="d-flex align-items-center mb-3">
-                <a href="{{ route('dokter.rekammedis') }}" class="text-decoration-none">
+                <a href="{{ route('admin.rekammedis') }}" class="text-decoration-none">
                     <i class="back-arrow bi bi-arrow-left"></i>
                 </a>
                 <h1 class="header ms-2">Detail Pasien</h1>
@@ -152,10 +152,10 @@
             @if($data->rekamMedis->isNotEmpty())
                 @foreach($data->rekamMedis as $record)
                     <div class="record-section">
-                    <div class="record-header" data-bs-toggle="collapse" data-bs-target="#record{{ $record->id }}" aria-expanded="false" aria-controls="record{{ $record->id }}">
-                        <span>TGL {{ \Carbon\Carbon::parse($record->tanggal_pemeriksaan)->format('d/m/Y') }}</span>
-                        <i id="arrowIcon{{ $record->id }}" class="bi bi-chevron-down chevron-icon ms-2"></i>
-                    </div>
+                        <div class="record-header" data-bs-toggle="collapse" data-bs-target="#record{{ $record->id }}" aria-expanded="false" aria-controls="record{{ $record->id }}">
+                            <span>TGL {{ \Carbon\Carbon::parse($record->tanggal_pemeriksaan)->format('d/m/Y') }}</span>
+                            <i id="arrowIcon{{ $record->id }}" class="bi bi-chevron-down chevron-icon ms-2"></i>
+                        </div>
 
                         <div id="record{{ $record->id }}" class="collapse">
                             <div class="record-details">

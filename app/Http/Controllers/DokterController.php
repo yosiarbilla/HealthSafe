@@ -5,12 +5,58 @@ namespace App\Http\Controllers;
 use App\Models\Antrian;
 use App\Models\Pasien;
 use App\Models\RekamMedis;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DokterController extends Controller
 {
     public function index(){
-        return view('dokter.dashboard');
+        $today = Carbon::today();
+        $totalPasienHariIni = Antrian::whereDate('created_at', $today)->count();
+
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
+        $todayDate = Carbon::now()->format('d M Y');
+        $pasienMingguan = Antrian::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->groupBy('date')
+            ->get();
+
+        return view('dokter.dashboard', [
+            'totalPasienHariIni' => $totalPasienHariIni,
+            'pasienMingguan' => $pasienMingguan,
+            'todayDate' => $todayDate,
+        ]);
+    }
+    public function patientsToday()
+    {
+        $today = Carbon::today();
+        $patients = Antrian::whereDate('created_at', $today)->with('pasien')->get();
+        $totalPatients = $patients->count();
+
+        return view('dokter.patients_today', [
+            'patients' => $patients,
+            'todayDate' => $today->format('d M Y'),
+            'totalPatients' => $totalPatients,
+        ]);
+    }
+    public function patientsWeekly()
+    {
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
+
+        $patientsByDate = Antrian::whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->with('pasien')
+            ->get()
+            ->groupBy(function ($patient) {
+                return Carbon::parse($patient->created_at)->format('d M Y');
+            });
+
+        return view('dokter.patients_weekly', [
+            'patientsByDate' => $patientsByDate,
+            'startOfWeek' => $startOfWeek->format('d M Y'),
+            'endOfWeek' => $endOfWeek->format('d M Y'),
+        ]);
     }
     public function daftarantrian(){
         $data = Antrian::with('pasien')
@@ -105,6 +151,7 @@ class DokterController extends Controller
             'id' => 'required|exists:antrian,id',
             'keluhan' => 'required|string',
             'diagnosis' => 'required|string',
+            'tindakan' => 'required|string',
             'obat' => 'required|string',
         ]);
 
@@ -115,6 +162,7 @@ class DokterController extends Controller
             'keluhan' => $request->input('keluhan'),
             'diagnosis' => $request->input('diagnosis'),
             'obat' => $request->input('obat'),
+            'tindakan' => $request->input('tindakan'),
             'tanggal_pemeriksaan' => now(),
         ]);
 

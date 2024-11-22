@@ -148,12 +148,12 @@
                         <button class="btn btn-primary btn-sm" onclick="openExamineModal({
                             id: {{ $no->id }},
                             tanggal_pemeriksaan: '{{ \Carbon\Carbon::parse($no->tanggal_pemeriksaan)->format('d/m/Y') }}',
-                            nama_lengkap: '{{ $no->nama_lengkap }}',
-                            alamat: '{{ $no->alamat }}',
-                            umur: '{{ $no->umur }}',
-                            gender: '{{ $no->gender }}',
-                            pendidikan: '{{ $no->pendidikan }}',
-                            pekerjaan: '{{ $no->pekerjaan }}'
+                            nama_lengkap: '{{ optional($no->pasien)->nama_lengkap ?? '' }}',
+                            alamat: '{{ optional($no->pasien)->alamat ?? '' }}',
+                            umur: '{{ optional($no->pasien)->umur ?? '' }}',
+                            gender: '{{ optional($no->pasien)->gender ?? '' }}',
+                            pendidikan: '{{ optional($no->pasien)->pendidikan ?? '' }}',
+                            pekerjaan: '{{ optional($no->pasien)->pekerjaan ?? '' }}'
                         })">Periksa</button>
                     </div>
                 </div>
@@ -192,6 +192,10 @@
                     <div class="mb-3">
                         <label for="diagnosis" class="form-label">Diagnosis</label>
                         <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tindakan" class="form-label">Tindakan</label>
+                        <textarea class="form-control" id="tindakan" name="tindakan" rows="3" required></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="obat" class="form-label">Obat</label>

@@ -26,6 +26,7 @@ class RekamMedis extends Model
         'keluhan',
         'diagnosis',
         'obat',
+        'tindakan',
         'tanggal_pemeriksaan',
     ];
 

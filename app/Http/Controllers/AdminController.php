@@ -5,11 +5,59 @@ namespace App\Http\Controllers;
 use App\Models\Antrian;
 use Illuminate\Http\Request;
 use App\Models\Pasien;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 class AdminController extends Controller
 {
-    public function index(){
-        return view('admin.dashboard');
+    public function index()
+    {
+        $today = Carbon::today();
+        $totalPasienHariIni = Antrian::whereDate('created_at', $today)->count();
+
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
+        $todayDate = Carbon::now()->format('d M Y');
+        $pasienMingguan = Antrian::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->groupBy('date')
+            ->get();
+
+        return view('admin.dashboard', [
+            'totalPasienHariIni' => $totalPasienHariIni,
+            'pasienMingguan' => $pasienMingguan,
+            'todayDate' => $todayDate,
+        ]);
+    }
+
+    public function patientsToday()
+    {
+        $today = Carbon::today();
+        $patients = Antrian::whereDate('created_at', $today)->with('pasien')->get();
+        $totalPatients = $patients->count();
+
+        return view('admin.patients_today', [
+            'patients' => $patients,
+            'todayDate' => $today->format('d M Y'),
+            'totalPatients' => $totalPatients,
+        ]);
+    }
+    public function patientsWeekly()
+    {
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
+
+        $patientsByDate = Antrian::whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->with('pasien')
+            ->get()
+            ->groupBy(function ($patient) {
+                return Carbon::parse($patient->created_at)->format('d M Y');
+            });
+
+        return view('admin.patients_weekly', [
+            'patientsByDate' => $patientsByDate,
+            'startOfWeek' => $startOfWeek->format('d M Y'),
+            'endOfWeek' => $endOfWeek->format('d M Y'),
+        ]);
     }
 
     public function daftarantrian()
@@ -49,20 +97,39 @@ class AdminController extends Controller
     }
     public function editPatient(Request $request, $id)
     {
+        // Validasi input
+        $validatedData = $request->validate([
+            'nama' => 'required|string|max:255',
+            'alamat' => 'required|string|max:255',
+            'umur' => 'required|integer|min:0',
+            'gender' => 'required|string|in:Laki-laki,Perempuan',
+            'pendidikan' => 'nullable|string|max:255',
+            'pekerjaan' => 'nullable|string|max:255',
+            'tanggal_pemeriksaan' => 'required|date',
+        ]);
+
+        // Temukan pasien berdasarkan ID
         $patient = Pasien::findOrFail($id);
 
-        $patient->nama_lengkap = $request->input('nama');
-        $patient->alamat = $request->input('alamat');
-        $patient->umur = $request->input('umur');
-        $patient->gender = $request->input('gender');
-        $patient->pendidikan = $request->input('pendidikan');
-        $patient->pekerjaan = $request->input('pekerjaan');
-        $patient->tanggal_pemeriksaan = $request->input('tanggal_pemeriksaan');
+        // Update data pasien
+        $patient->update([
+            'nama_lengkap' => $validatedData['nama'],
+            'alamat' => $validatedData['alamat'],
+            'umur' => $validatedData['umur'],
+            'gender' => $validatedData['gender'],
+            'pendidikan' => $validatedData['pendidikan'],
+            'pekerjaan' => $validatedData['pekerjaan'],
+            'tanggal_pemeriksaan' => $validatedData['tanggal_pemeriksaan'],
+        ]);
+        Log::info('Route editPatient berhasil dipanggil untuk ID: ' . $id);
+        Log::info('Redirect ke admin.daftarantrian');
 
-        $patient->save();
+        // Redirect ke halaman daftar antrian dengan pesan sukses
+        return redirect()->route('admin.daftarantrian')->with('success', 'Data pasien berhasil diubah.');
 
-        return redirect()->back()->with('success', 'Data pasien berhasil diubah.');
     }
+
+
     public function tambahantrian(Request $request)
     {
         $request->validate([
@@ -94,19 +161,17 @@ class AdminController extends Controller
             // Mengembalikan tampilan parsial untuk daftar pasien
             return view('admin.partials.patient_list', compact('data'))->render();
         }
-    public function searchAntrian2(Request $request)
+        public function searchAntrian2(Request $request)
         {
             $search = $request->input('search');
-    $data = Pasien::where('nama_lengkap', 'LIKE', '%' . $search . '%')
-        ->orderBy('tanggal_pemeriksaan')
-        ->get()
-        ->groupBy(function($item) {
-            return \Carbon\Carbon::parse($item->tanggal_pemeriksaan)->format('d F Y');
-        });
+            $data = Pasien::where('nama_lengkap', 'LIKE', '%' . $search . '%')
+                ->orderBy('nama_lengkap') // Urutkan berdasarkan nama lengkap
+                ->get();
 
-    // Render the partial view and return it as a response for AJAX
-    return view('admin.partials.patient_list_rm', compact('data'))->render();
+            // Render the partial view and return it as a response for AJAX
+            return view('admin.partials.patient_list_rm', compact('data'))->render();
         }
+
     protected function resetQueue()
     {
         $antrianAktif = Antrian::where('status', 'antri')->orderBy('nomor_antrian', 'asc')->get();
@@ -176,6 +241,13 @@ class AdminController extends Controller
             $data->save();
 
             return redirect()->back()->with('success', 'Pasien berhasil ditambahkan!');
+        }
+
+        public function detailPasien($id)
+        {
+            $data = Pasien::with('rekamMedis')->findOrFail($id);
+
+            return view('admin.detail-pasien', compact('data'));
         }
 
 
