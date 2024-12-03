@@ -49,6 +49,8 @@ route::middleware(['auth', Dokter::class])->group(function(){
     route::get('/dokter/daftarantrian', [DokterController::class, 'daftarantrian'])->name('dokter.daftarantrian');
     Route::get('/dokter/search-antrian', [DokterController::class, 'searchAntrian'])->name('dokter.search.antrian');
     Route::get('/dokter/rekam-medis', [DokterController::class, 'rekammedis'])->name('dokter.rekammedis');
+    Route::get('/dokter/rekam-medis/{id}/edit', [DokterController::class, 'edit'])->name('dokter.rekam-medis.edit');
+Route::put('/dokter/rekam-medis/{id}', [DokterController::class, 'update'])->name('dokter.rekam-medis.update');
     Route::delete('/dokter/delete/{id}', [DokterController::class, 'deletePatient'])->name('dokter.delete');
 
     Route::get('/dokter/detailpasien/{id}', [DokterController::class, 'lihatdetail'])->name('dokter.lihatdetail');

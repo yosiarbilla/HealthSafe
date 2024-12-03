@@ -187,5 +187,27 @@ class DokterController extends Controller
         return response()->json(['success' => false, 'message' => 'Data pasien tidak ditemukan.']);
     }
 
+    public function edit($id)
+    {
+        $record = RekamMedis::findOrFail($id);
+        return response()->json($record);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            // 'tanggal_pemeriksaan' => 'required|date',
+            'keluhan' => 'required|string',
+            'diagnosis' => 'required|string',
+            'tindakan' => 'required|string',
+            'obat' => 'required|string'
+        ]);
+
+        $record = RekamMedis::findOrFail($id);
+        $record->update($validatedData);
+
+        return redirect()->back()->with('success', 'Rekam medis berhasil diperbarui');
+    }
+
 
 }

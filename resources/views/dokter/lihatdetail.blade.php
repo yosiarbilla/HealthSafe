@@ -114,6 +114,28 @@
             margin-top: 1rem;
         }
 
+        .record-detail-item {
+            background-color: white;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            height: 100px;
+            overflow-y: auto;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .record-detail-label {
+            font-weight: bold;
+            color: #0085AA;
+            margin-bottom: 5px;
+        }
+
+        .record-detail-content {
+            color: #004d66;
+            height: calc(100% - 25px);
+            overflow-y: auto;
+        }
+
         .download-button {
             background-color: #0085AA;
             color: white;
@@ -154,17 +176,44 @@
                     <div class="record-section">
                     <div class="record-header" data-bs-toggle="collapse" data-bs-target="#record{{ $record->id }}" aria-expanded="false" aria-controls="record{{ $record->id }}">
                         <span>TGL {{ \Carbon\Carbon::parse($record->tanggal_pemeriksaan)->format('d/m/Y') }}</span>
-                        <i id="arrowIcon{{ $record->id }}" class="bi bi-chevron-down chevron-icon ms-2"></i>
+                        <div>
+                            <button class="btn btn-primary btn-sm me-2" onclick="editRecord({{ $record->id }})">
+                                <i class="bi bi-pencil"></i> Edit
+                            </button>
+                            <i id="arrowIcon{{ $record->id }}" class="bi bi-chevron-down chevron-icon ms-2"></i>
+                        </div>
                     </div>
 
                         <div id="record{{ $record->id }}" class="collapse">
                             <div class="record-details">
-                                <p><strong>Keluhan:</strong> {{ $record->keluhan }}</p>
-                                <p><strong>Diagnosis:</strong> {{ $record->diagnosis }}</p>
-                                <p><strong>Tindakan:</strong> {{ $record->tindakan }}</p>
-                                <p><strong>Obat:</strong> {{ $record->obat }}</p>
-                                <button class="download-button" onclick="downloadPDF('{{ $record->tanggal_pemeriksaan }}', '{{ $record->keluhan }}', '{{ $record->diagnosis }}', '{{ $record->obat }}')">Download PDF</button>
+                                <div class="record-detail-label">Keluhan</div>
+                                <div class="record-detail-item">
+                                    <div class="record-detail-content">{{ $record->keluhan }}</div>
+                                </div>
+
+                                <div class="record-detail-label">Diagnosis</div>
+                                <div class="record-detail-item">
+                                    <div class="record-detail-content">{{ $record->diagnosis }}</div>
+                                </div>
+
+                                <div class="record-detail-label">Tindakan</div>
+                                <div class="record-detail-item">
+                                    <div class="record-detail-content">{{ $record->tindakan }}</div>
+                                </div>
+
+                                <div class="record-detail-label">Obat</div>
+                                <div class="record-detail-item">
+                                    <div class="record-detail-content">{{ $record->obat }}</div>
+                                </div>
                             </div>
+                            <button class="download-button" onclick="downloadPDF(
+                                '{{ $data->nama_lengkap }}',
+                                '{{ \Carbon\Carbon::parse($record->tanggal_pemeriksaan)->format('d/m/Y') }}',
+                                '{{ $record->keluhan }}',
+                                '{{ $record->diagnosis }}',
+                                '{{ $record->tindakan }}',
+                                '{{ $record->obat }}'
+                            )">Download PDF</button>
                         </div>
                     </div>
                 @endforeach
@@ -176,31 +225,128 @@
     </div>
 </div>
 
+<div class="modal fade" id="editRecordModal" tabindex="-1" aria-labelledby="editRecordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRecordModalLabel">Edit Rekam Medis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editRecordForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="row">
+                        {{-- <div class="col-md-6 mb-3">
+                            <label class="form-label">Tanggal Pemeriksaan</label>
+                            <input type="date" class="form-control" name="tanggal_pemeriksaan" id="edit_tanggal_pemeriksaan" required>
+                        </div> --}}
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Keluhan</label>
+                            <textarea class="form-control" name="keluhan" id="edit_keluhan" rows="3" required></textarea>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Diagnosis</label>
+                            <textarea class="form-control" name="diagnosis" id="edit_diagnosis" rows="3" required></textarea>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Tindakan</label>
+                            <textarea class="form-control" name="tindakan" id="edit_tindakan" rows="3" required></textarea>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Obat</label>
+                            <textarea class="form-control" name="obat" id="edit_obat" rows="3" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script>
-    function downloadPDF(date, keluhan, diagnosis, obat) {
+    function downloadPDF(patientName, date, keluhan, diagnosis, tindakan, obat) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
-        // Set PDF title
-        doc.setFontSize(18);
-        doc.text("Detail Pasien", 10, 10);
+        doc.setFont('helvetica', 'bold');
 
-        // Examination details
+        doc.setFontSize(16);
+        doc.text("REKAM MEDIS PASIEN", 105, 20, { align: 'center' });
         doc.setFontSize(12);
-        doc.text(`Tanggal Pemeriksaan: ${date}`, 10, 20);
-        doc.text("Keluhan:", 10, 30);
-        doc.text(keluhan, 20, 40);
-        doc.text("Diagnosis:", 10, 50);
-        doc.text(diagnosis, 20, 60);
-        doc.text("Obat:", 10, 70);
-        doc.text(obat, 20, 80);
-        doc.text("Tindakan:", 10, 70);
-        doc.text(tindakan, 20, 80);
+        doc.setFont('helvetica', 'normal');
+        doc.text("APOTEK SETIA BUDI", 105, 28, { align: 'center' });
+        doc.text("Alamat: ", 105, 35, { align: 'center' });
 
-        // Save the PDF
-        doc.save(`Detail_Pemeriksaan_${date}.pdf`);
+        doc.setLineWidth(0.5);
+        doc.line(20, 40, 190, 40);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text("Identitas Pasien", 20, 50);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Nama Pasien: ${patientName}`, 20, 58);
+        doc.text(`Tanggal Pemeriksaan: ${date}`, 20, 66);
+
+        doc.setLineWidth(0.5);
+        doc.line(20, 72, 190, 72);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text("Detail Pemeriksaan", 20, 82);
+
+        doc.setFont('helvetica', 'bold');
+        doc.text("Keluhan:", 20, 92);
+        doc.setFont('helvetica', 'normal');
+        doc.text(keluhan, 30, 100, { maxWidth: 170 });
+
+        doc.setFont('helvetica', 'bold');
+        doc.text("Diagnosis:", 20, 120);
+        doc.setFont('helvetica', 'normal');
+        doc.text(diagnosis, 30, 128, { maxWidth: 170 });
+
+        doc.setFont('helvetica', 'bold');
+        doc.text("Tindakan:", 20, 148);
+        doc.setFont('helvetica', 'normal');
+        doc.text(tindakan, 30, 156, { maxWidth: 170 });
+
+        doc.setFont('helvetica', 'bold');
+        doc.text("Obat:", 20, 176);
+        doc.setFont('helvetica', 'normal');
+        doc.text(obat, 30, 184, { maxWidth: 170 });
+
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(10);
+        doc.text("Dokumen Rekam Medis - Rahasia Medis", 105, 280, { align: 'center' });
+
+        doc.setFontSize(10);
+        doc.text(`Halaman 1 dari 1`, 190, 290, { align: 'right' });
+
+        doc.save(`Rekam_Medis_${patientName}_${date}.pdf`);
+    }
+    function editRecord(recordId) {
+        fetch(`/dokter/rekam-medis/${recordId}/edit`)
+            .then(response => response.json())
+            .then(data => {
+                // document.getElementById('edit_tanggal_pemeriksaan').value = data.tanggal_pemeriksaan;
+                document.getElementById('edit_keluhan').value = data.keluhan;
+                document.getElementById('edit_diagnosis').value = data.diagnosis;
+                document.getElementById('edit_tindakan').value = data.tindakan;
+                document.getElementById('edit_obat').value = data.obat;
+
+                document.getElementById('editRecordForm').action = `/dokter/rekam-medis/${recordId}`;
+
+                var editModal = new bootstrap.Modal(document.getElementById('editRecordModal'));
+                editModal.show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Gagal mengambil data rekam medis');
+            });
     }
 
 </script>
