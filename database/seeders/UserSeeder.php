@@ -31,6 +31,14 @@ class UserSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'name' => 'superadmin',
+                'email' => 'superadmin@apoteksetiabudi.com',
+                'password' => Hash::make('superadmin123'),
+                'role' => 'superadmin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
     }
 }

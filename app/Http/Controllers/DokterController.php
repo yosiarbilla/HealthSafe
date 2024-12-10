@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Antrian;
+use App\Models\LogRekamMedis;
 use App\Models\Pasien;
 use App\Models\RekamMedis;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DokterController extends Controller
 {
@@ -196,15 +198,32 @@ class DokterController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            // 'tanggal_pemeriksaan' => 'required|date',
             'keluhan' => 'required|string',
             'diagnosis' => 'required|string',
             'tindakan' => 'required|string',
-            'obat' => 'required|string'
+            'obat' => 'required|string',
         ]);
 
         $record = RekamMedis::findOrFail($id);
+
+        $originalData = $record->only(['keluhan', 'diagnosis', 'tindakan', 'obat']);
+        $changes = array_diff($validatedData, $originalData);
+
         $record->update($validatedData);
+
+        LogRekamMedis::create([
+            'dokter_id' => Auth::id(),
+            'rekam_medis_id' => $record->id,
+            'action' => 'update',
+            'changes' => json_encode([
+                'keluhan' => ['old' => $originalData['keluhan'], 'new' => $validatedData['keluhan']],
+                'diagnosis' => ['old' => $originalData['diagnosis'], 'new' => $validatedData['diagnosis']],
+                'tindakan' => ['old' => $originalData['tindakan'], 'new' => $validatedData['tindakan']],
+                'obat' => ['old' => $originalData['obat'], 'new' => $validatedData['obat']],
+            ]),
+            'created_at' => now(),
+        ]);
+
 
         return redirect()->back()->with('success', 'Rekam medis berhasil diperbarui');
     }

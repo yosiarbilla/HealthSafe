@@ -16,7 +16,7 @@ class Admin
     public function handle(Request $request, Closure $next): Response
     {
 
-        if(Auth::user()->name != 'administrasi'){
+        if(Auth::user()->role != 'administrasi'){
             return redirect ('login');
         }
         return $next($request);

@@ -3,8 +3,10 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DokterController;
+use App\Http\Controllers\SuperAdminController;
 use App\Http\Middleware\Admin;
 use App\Http\Middleware\Dokter;
+use App\Http\Middleware\SuperAdmin;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -42,6 +44,23 @@ route::middleware(['auth', Admin::class])->group(function(){
 
 
 });
+
+
+route::middleware(['auth', SuperAdmin::class])->group(function(){
+    route::get('/superadmin/dashboard', [SuperAdminController::class, 'index'])->name('superadmin.dashboard');
+    Route::get('/superadmin/patients/today', [SuperAdminController::class, 'patientsToday'])->name('superadmin.patients.today');
+    Route::get('/superadmin/patients/weekly', [SuperAdminController::class, 'patientsWeekly'])->name('superadmin.patients.weekly');
+
+    Route::get('/superadmin/users', [SuperAdminController::class, 'users'])->name('superadmin.users');
+    Route::get('/superadmin/users/search', [SuperAdminController::class, 'searchUser'])->name('superadmin.searchUser');
+    Route::post('/superadmin/users', [SuperAdminController::class, 'saveUser'])->name('superadmin.saveUser');
+    Route::delete('/superadmin/users/{id}', [SuperAdminController::class, 'deleteUser'])->name('superadmin.deleteUser');
+
+    Route::get('/superadmin/log-rekam-medis', [SuperAdminController::class, 'logRekamMedis'])->name('superadmin.logRekamMedis');
+
+});
+
+
 route::middleware(['auth', Dokter::class])->group(function(){
     route::get('/dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
     Route::get('/dokter/patients/today', [DokterController::class, 'patientsToday'])->name('dokter.patients.today');
@@ -50,7 +69,7 @@ route::middleware(['auth', Dokter::class])->group(function(){
     Route::get('/dokter/search-antrian', [DokterController::class, 'searchAntrian'])->name('dokter.search.antrian');
     Route::get('/dokter/rekam-medis', [DokterController::class, 'rekammedis'])->name('dokter.rekammedis');
     Route::get('/dokter/rekam-medis/{id}/edit', [DokterController::class, 'edit'])->name('dokter.rekam-medis.edit');
-Route::put('/dokter/rekam-medis/{id}', [DokterController::class, 'update'])->name('dokter.rekam-medis.update');
+    Route::put('/dokter/rekam-medis/{id}', [DokterController::class, 'update'])->name('dokter.rekam-medis.update');
     Route::delete('/dokter/delete/{id}', [DokterController::class, 'deletePatient'])->name('dokter.delete');
 
     Route::get('/dokter/detailpasien/{id}', [DokterController::class, 'lihatdetail'])->name('dokter.lihatdetail');
