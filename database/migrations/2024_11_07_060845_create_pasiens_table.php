@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('pasiens', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_lengkap'); // Full Name
-            $table->string('alamat'); // Address
-            $table->integer('umur'); // Age
-            $table->enum('gender', ['Laki-laki', 'Perempuan']); // Gender
-            $table->string('pendidikan'); // Education
-            $table->string('pekerjaan'); // Job
-            $table->date('tanggal_pemeriksaan'); // Examination Date
+            $table->string('nama_lengkap');
+            $table->string('alamat');
+            $table->integer('umur');
+            $table->enum('gender', ['Laki-laki', 'Perempuan']);
+            $table->string('pendidikan');
+            $table->string('pekerjaan');
+            $table->date('tanggal_pemeriksaan');
             $table->timestamps();
             $table->string('status')->default('antri');
         });
@@ -31,8 +31,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('pasiens');
-        $table->dropColumn('status');
     }
-    
-    
+
+
 };
