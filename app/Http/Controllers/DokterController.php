@@ -44,20 +44,24 @@ class DokterController extends Controller
     }
     public function patientsWeekly()
     {
-        $startOfWeek = Carbon::now()->startOfWeek();
-        $endOfWeek = Carbon::now()->endOfWeek();
-
-        $patientsByDate = Antrian::whereBetween('created_at', [$startOfWeek, $endOfWeek])
-            ->with('pasien')
+        // Ambil semua data antrian, tidak terbatas minggu ini saja
+        $patientsByWeek = Antrian::with('pasien')
             ->get()
             ->groupBy(function ($patient) {
-                return Carbon::parse($patient->created_at)->format('d M Y');
+                // Kelompokkan berdasarkan minggu (tahun + minggu ke berapa)
+                $date = Carbon::parse($patient->created_at);
+                return $date->year . ' - Week ' . $date->week;
             });
 
+        // Format minggu agar lebih mudah dibaca di view
+        $formattedPatientsByWeek = $patientsByWeek->mapWithKeys(function ($patients, $week) {
+            $firstDate = Carbon::parse($patients->first()->created_at)->startOfWeek()->format('d M Y');
+            $lastDate = Carbon::parse($patients->first()->created_at)->endOfWeek()->format('d M Y');
+            return ["$firstDate - $lastDate" => $patients];
+        });
+
         return view('dokter.patients_weekly', [
-            'patientsByDate' => $patientsByDate,
-            'startOfWeek' => $startOfWeek->format('d M Y'),
-            'endOfWeek' => $endOfWeek->format('d M Y'),
+            'patientsByWeek' => $formattedPatientsByWeek,
         ]);
     }
     public function daftarantrian(){

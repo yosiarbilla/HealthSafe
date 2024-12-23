@@ -60,30 +60,30 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-             @include('superadmin.sidebar')
-                <div class="col main-content">
-                    <div class="d-flex align-items-center mb-3">
-                        <a href="{{ route('superadmin.dashboard') }}" class="d-inline-flex align-items-center mb-3 text-decoration-none">
-                            <i class="back-arrow bi bi-arrow-left"></i>
-                        </a>
-                        <h1 class="dashboard-header">Total Pasien Mingguan ({{ $startOfWeek }} - {{ $endOfWeek }})</h1>
-                    </div>
-                    @if($patientsByDate->isEmpty())
-                        <p class="text-muted">Tidak ada pasien selama minggu ini.</p>
-                    @else
-                        @foreach($patientsByDate as $date => $patients)
-                            <div class="date-summary">
-                                <div class="date-header">{{ $date }}</div>
-                                <div class="total-patients">Total Pasien: <strong>{{ $patients->count() }}</strong></div>
-                            </div>
-                            @foreach($patients as $patient)
-                                <div class="patient-list">
-                                    <span>{{ $patient->nomor_antrian }}. {{ optional($patient->pasien)->nama_lengkap }}</span>
-                                </div>
-                            @endforeach
-                        @endforeach
-                    @endif
+            @include('superadmin.sidebar')
+            <div class="col main-content">
+                <div class="d-flex align-items-center mb-3">
+                    <a href="{{ route('superadmin.dashboard') }}" class="d-inline-flex align-items-center mb-3 text-decoration-none">
+                        <i class="back-arrow bi bi-arrow-left"></i>
+                    </a>
+                    <h1 class="dashboard-header">Daftar Pasien Per Minggu</h1>
                 </div>
+                @if($patientsByWeek->isEmpty())
+                    <p class="text-muted">Tidak ada pasien yang tercatat.</p>
+                @else
+                    @foreach($patientsByWeek as $week => $patients)
+                        <div class="date-summary">
+                            <div class="date-header">{{ $week }}</div>
+                            <div class="total-patients">Total Pasien: <strong>{{ $patients->count() }}</strong></div>
+                        </div>
+                        @foreach($patients as $patient)
+                            <div class="patient-list">
+                                <span>{{ $patient->nomor_antrian }}. {{ optional($patient->pasien)->nama_lengkap }}</span>
+                            </div>
+                        @endforeach
+                    @endforeach
+                @endif
+            </div>
         </div>
     </div>
 </body>
