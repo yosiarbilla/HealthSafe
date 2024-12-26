@@ -85,24 +85,49 @@ class DokterController extends Controller
 
 
     public function searchAntrian(Request $request)
-{
-    $searchQuery = $request->input('search');
-    $data = Pasien::where('nama_lengkap', 'LIKE', '%' . $searchQuery . '%')->get();
+    {
+        $searchQuery = $request->input('search');
+        $data = Antrian::with('pasien')
+            ->whereHas('pasien', function ($query) use ($searchQuery) {
+                $query->where('nama_lengkap', 'LIKE', '%' . $searchQuery . '%');
+            })
+            ->where('status', '!=', 'selesai') // Filter untuk mengecualikan status selesai
+            ->get();
 
-    $output = '';
-    foreach ($data as $index => $patient) {
-        $output .= '
-            <div class="patient-list d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapsePatient' . $index . '" aria-expanded="false" aria-controls="collapsePatient' . $index . '">
-                <span>' . ($index + 1) . '. ' . $patient->nama_lengkap . '</span>
-            </div>';
+        $output = '';
+        foreach ($data as $index => $patient) {
+            $statusClass = $patient->status === 'sedang diperiksa' ? 'bg-danger' : 'bg-secondary';
+            $statusLabel = ucfirst($patient->status);
+
+            $output .= '
+                <div class="patient-list d-flex justify-content-between align-items-center" data-id="' . $patient->id . '">
+                    <div class="patient-info d-flex align-items-center">
+                        <span>' . ($index + 1) . '. ' . optional($patient->pasien)->nama_lengkap . '</span>
+                        <span class="ms-3 badge ' . $statusClass . '">' . $statusLabel . '</span>
+                    </div>
+                    <div class="button-group ms-auto">
+                        <button class="btn btn-primary btn-sm" onclick="openExamineModal({
+                            id: ' . $patient->id . ',
+                            tanggal_pemeriksaan: \'' . Carbon::parse($patient->created_at)->format('d/m/Y') . '\',
+                            nama_lengkap: \'' . optional($patient->pasien)->nama_lengkap . '\',
+                            alamat: \'' . optional($patient->pasien)->alamat . '\',
+                            umur: \'' . optional($patient->pasien)->umur . '\',
+                            gender: \'' . optional($patient->pasien)->gender . '\',
+                            pendidikan: \'' . optional($patient->pasien)->pendidikan . '\',
+                            pekerjaan: \'' . optional($patient->pasien)->pekerjaan . '\'
+                        })">Periksa</button>
+                    </div>
+                </div>';
+        }
+
+        if ($output == '') {
+            $output = '<div class="text-center text-muted">No patients found</div>';
+        }
+
+        return response($output);
     }
 
-    if ($output == '') {
-        $output = '<div class="text-center text-muted">No patients found</div>';
-    }
 
-    return response($output);
-}
 
 // In DokterController.php
     protected function resetQueue()
